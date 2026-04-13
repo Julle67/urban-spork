@@ -1,6 +1,64 @@
 <html>
-  <body style="text-align: center; padding-top: 50vh;">
-    <button onclick="document.getElementById('message').innerHTML = 'You clicked the button!'">Click me!</button>
-    <p id="message"></p>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding-top: 50px;
+      }
+
+      .message {
+        font-size: 18px;
+        color: blue;
+      }
+
+      #guessInput {
+        padding: 10px;
+        font-size: 16px;
+      }
+
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Gissa numret!</h2>
+    <p>Jag har valt ett nummer mellan 1 och 100. Kan du gissa vilket?</p>
+
+    <input type="number" id="guessInput" placeholder="Skriv ditt gissning här" />
+    <button onclick="checkGuess()">Gissa!</button>
+
+    <p id="feedback" class="message"></p>
+
+    <script>
+      // Slumpmässigt nummer mellan 1 och 100
+      let randomNumber = Math.floor(Math.random() * 100) + 1;
+
+      function checkGuess() {
+        // Hämta användarens gissning
+        let guess = parseInt(document.getElementById("guessInput").value);
+        let feedback = document.getElementById("feedback");
+
+        if (isNaN(guess) || guess < 1 || guess > 100) {
+          feedback.textContent = "Vänligen skriv ett nummer mellan 1 och 100!";
+          feedback.style.color = "red";
+        } else if (guess > randomNumber) {
+          feedback.textContent = "För högt! Försök igen.";
+          feedback.style.color = "orange";
+        } else if (guess < randomNumber) {
+          feedback.textContent = "För lågt! Försök igen.";
+          feedback.style.color = "orange";
+        } else {
+          feedback.textContent = "Grattis! Du gissade rätt!";
+          feedback.style.color = "green";
+        }
+
+        // Rensa inputfältet
+        document.getElementById("guessInput").value = "";
+      }
+    </script>
   </body>
 </html>
