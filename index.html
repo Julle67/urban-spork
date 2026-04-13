@@ -55,7 +55,7 @@
       let player = document.getElementById("player");
       let scoreDisplay = document.getElementById("score");
       let playerX = 50;
-      let playerY = 500;
+      let playerY = 400;  // Justerat startvärde för att spelaren ska börja ovanför plattformarna
       let speedX = 0;
       let speedY = 0;
       let gravity = 0.5;
@@ -80,8 +80,8 @@
       }
 
       // Skapa några plattformar
-      createPlatform(100, 450);
-      createPlatform(300, 400);
+      createPlatform(100, 450);  // Första plattformen vid y=450
+      createPlatform(300, 400);  // Nästa plattform vid y=400
       createPlatform(500, 350);
       createPlatform(700, 300);
       createPlatform(900, 250);
@@ -147,7 +147,7 @@
         score = 0;
         scoreDisplay.textContent = "Poäng: " + score;
         playerX = 50;
-        playerY = 500;
+        playerY = 400; // Justerat tillbaka till startpositionen
         speedX = 0;
         speedY = 0;
         platforms = [];
