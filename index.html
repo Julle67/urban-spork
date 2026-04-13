@@ -1,5 +1,170 @@
 <html>
-  <body style="text-align: center; padding-top: 50vh;">
-    <button>hej</button>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+      }
+
+      #gameArea {
+        width: 100%;
+        height: 100vh;
+        position: relative;
+        background-color: #cce7ff;
+        overflow: hidden;
+      }
+
+      .platform {
+        position: absolute;
+        width: 150px;
+        height: 20px;
+        background-color: #4CAF50;
+        border-radius: 5px;
+      }
+
+      .player {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: #FF6347;
+        border-radius: 50%;
+        z-index: 2;
+      }
+
+      #score {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        z-index: 2;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gameArea">
+      <div id="score">Poäng: 0</div>
+      <div id="player" class="player"></div>
+    </div>
+
+    <script>
+      // Spelvariabler
+      let player = document.getElementById("player");
+      let scoreDisplay = document.getElementById("score");
+      let playerX = 50;
+      let playerY = 500;
+      let speedX = 0;
+      let speedY = 0;
+      let gravity = 0.5;
+      let jumpPower = -10;
+      let platforms = [];
+      let score = 0;
+      let gameArea = document.getElementById("gameArea");
+      let jumping = false;
+
+      // Spelarens position och initialisering
+      player.style.left = playerX + "px";
+      player.style.top = playerY + "px";
+
+      // Funktion för att skapa en plattform
+      function createPlatform(x, y) {
+        let platform = document.createElement("div");
+        platform.classList.add("platform");
+        platform.style.left = x + "px";
+        platform.style.top = y + "px";
+        gameArea.appendChild(platform);
+        platforms.push(platform);
+      }
+
+      // Skapa några plattformar
+      createPlatform(100, 450);
+      createPlatform(300, 400);
+      createPlatform(500, 350);
+      createPlatform(700, 300);
+      createPlatform(900, 250);
+
+      // Uppdatera spelarens rörelse och fysik
+      function updatePlayer() {
+        // Gravitation
+        speedY += gravity;
+
+        playerX += speedX;
+        playerY += speedY;
+
+        // Kollisionsdetektion med plattformarna
+        platforms.forEach(platform => {
+          let platformX = parseInt(platform.style.left);
+          let platformY = parseInt(platform.style.top);
+          let platformWidth = platform.offsetWidth;
+          let platformHeight = platform.offsetHeight;
+
+          if (playerX + 30 > platformX && playerX < platformX + platformWidth && playerY + 30 > platformY && playerY + 30 < platformY + 10 && !jumping) {
+            speedY = 0;
+            jumping = false;
+            playerY = platformY - 30;
+            score++;
+            scoreDisplay.textContent = "Poäng: " + score;
+          }
+        });
+
+        // Spelarens gränser
+        if (playerY > window.innerHeight) {
+          alert("Game Over! Du föll! Din poäng är " + score);
+          resetGame();
+        }
+
+        // Uppdatera spelarens position
+        player.style.left = playerX + "px";
+        player.style.top = playerY + "px";
+      }
+
+      // Hoppa när mellanslagstangenten trycks
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "a") { // Vänster rörelse
+          speedX = -5;
+        } else if (e.key === "d") { // Höger rörelse
+          speedX = 5;
+        } else if (e.key === "w" && !jumping) { // Hoppa
+          speedY = jumpPower;
+          jumping = true;
+        } else if (e.key === "s") { // Ner (kan användas för att "dyka" eller för att ändra spelmekanik)
+          speedY = 2;
+        }
+      });
+
+      // Stanna spelarens rörelse när tangenten släpps
+      document.addEventListener("keyup", (e) => {
+        if (e.key === "a" || e.key === "d") {
+          speedX = 0; // Stanna rörelse åt vänster och höger
+        }
+      });
+
+      // Återställ spelet
+      function resetGame() {
+        score = 0;
+        scoreDisplay.textContent = "Poäng: " + score;
+        playerX = 50;
+        playerY = 500;
+        speedX = 0;
+        speedY = 0;
+        platforms = [];
+        createPlatform(100, 450);
+        createPlatform(300, 400);
+        createPlatform(500, 350);
+        createPlatform(700, 300);
+        createPlatform(900, 250);
+      }
+
+      // Spelets loop
+      function gameLoop() {
+        updatePlayer();
+      }
+
+      // Starta spelets loop
+      setInterval(gameLoop, 1000 / 60); // 60 FPS
+    </script>
   </body>
 </html>
