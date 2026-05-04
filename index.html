@@ -12,14 +12,14 @@ body {
     color: white;
 }
 
-/* TOPBAR */
 .topbar {
     padding: 10px;
     background: #111;
     display: flex;
-    justify-content: center;
     gap: 10px;
+    justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 input {
@@ -37,17 +37,6 @@ button {
     border-radius: 5px;
 }
 
-/* LOGIN */
-#loginPanel {
-    display: none;
-    position: absolute;
-    top: 60px;
-    background: #222;
-    padding: 15px;
-    border-radius: 10px;
-}
-
-/* GRID */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -59,8 +48,8 @@ button {
     background: #181818;
     border-radius: 10px;
     overflow: hidden;
-    position: relative;
     cursor: pointer;
+    position: relative;
 }
 
 .thumbnail {
@@ -78,13 +67,11 @@ button {
     padding: 5px;
 }
 
-/* MODAL */
 .modal {
     display: none;
     position: fixed;
     top: 0; left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background: rgba(0,0,0,0.95);
     justify-content: center;
     align-items: center;
@@ -99,172 +86,124 @@ button {
 
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
-
-    <button onclick="toggleLogin()">Logga in / Konto</button>
-
-    <span id="userText"></span>
+    <input id="search" placeholder="Sök YouTube (t.ex brawl stars)">
+    <button onclick="searchVideos()">Sök</button>
 
     <input id="videoId" placeholder="YouTube ID">
     <button onclick="addVideo()">Lägg till</button>
-
 </div>
 
-<!-- LOGIN PANEL -->
-<div id="loginPanel">
-    <input id="username" placeholder="Användarnamn"><br><br>
-    <input id="password" type="password" placeholder="Lösenord"><br><br>
-    <button onclick="register()">Skapa konto</button>
-    <button onclick="login()">Logga in</button>
-</div>
+<div id="results" style="padding:20px; display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:10px;"></div>
 
-<!-- VIDEOS -->
 <div class="grid" id="grid"></div>
 
-<!-- PLAYER -->
 <div class="modal" id="modal">
     <iframe id="player" allow="autoplay; fullscreen" allowfullscreen></iframe>
 </div>
 
 <script>
 
-/* DATA */
-let users = JSON.parse(localStorage.getItem("users")) || [];
-let currentUser = localStorage.getItem("currentUser") || null;
-let videos = JSON.parse(localStorage.getItem("videos")) || [];
+/* ================= DIN KEY ================= */
+const RAPIDAPI_KEY = "DIN_KEY_HÄR";
 
-/* SAVE */
-function saveUsers() {
-    localStorage.setItem("users", JSON.stringify(users));
-}
+/* ================= DATA ================= */
+let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
 function saveVideos() {
     localStorage.setItem("videos", JSON.stringify(videos));
 }
 
-/* LOGIN TOGGLE */
-function toggleLogin() {
-    const p = document.getElementById("loginPanel");
-    p.style.display = p.style.display === "block" ? "none" : "block";
-}
-
-/* AUTH */
-function register() {
-    const u = username.value;
-    const p = password.value;
-
-    if (!u || !p) return alert("Fyll i allt");
-
-    if (users.find(x => x.username === u))
-        return alert("Finns redan");
-
-    users.push({ username: u, password: p });
-    saveUsers();
-    alert("Konto skapat!");
-}
-
-function login() {
-    const u = username.value;
-    const p = password.value;
-
-    const user = users.find(x => x.username === u && x.password === p);
-
-    if (!user) return alert("Fel login");
-
-    currentUser = u;
-    localStorage.setItem("currentUser", currentUser);
-
-    refresh();
-}
-
-/* UI */
-function updateUI() {
-    userText.innerText = currentUser ? "Inloggad: " + currentUser : "Inte inloggad";
-}
-
-/* ADD VIDEO */
-function addVideo() {
-    if (!currentUser) return alert("Logga in först!");
-
-    const id = videoId.value;
-    if (!id) return;
+/* ================= ADD VIDEO ================= */
+function addVideo(id) {
+    const videoId = id || document.getElementById("videoId").value;
+    if (!videoId) return;
 
     videos.push({
-        id,
-        owner: currentUser,
-        created: Date.now()
+        id: videoId,
+        owner: "local"
     });
 
     saveVideos();
-    refresh();
+    loadVideos();
 
-    videoId.value = "";
+    document.getElementById("videoId").value = "";
 }
 
-/* RENDER FIX */
+/* ================= SEARCH (RAPIDAPI) ================= */
+async function searchVideos() {
+    const query = search.value;
+    if (!query) return;
+
+    const res = await fetch("https://youtube138.p.rapidapi.com/search/", {
+        method: "GET",
+        headers: {
+            "x-rapidapi-host": "youtube138.p.rapidapi.com",
+            "x-rapidapi-key": 0f6de4aa3fmsh2fe00e58ac5fb26p13edafjsn40b3c3b4b3a3
+        }
+    });
+
+    const data = await res.json();
+
+    results.innerHTML = "";
+
+    data.contents?.forEach(item => {
+        const videoId = item.video?.videoId;
+        const title = item.video?.title;
+
+        if (!videoId) return;
+
+        const div = document.createElement("div");
+        div.style.background = "#222";
+        div.style.padding = "10px";
+        div.style.borderRadius = "10px";
+        div.style.cursor = "pointer";
+
+        div.innerHTML = `
+            <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" style="width:100%">
+            <p>${title}</p>
+        `;
+
+        div.onclick = () => addVideo(videoId);
+
+        results.appendChild(div);
+    });
+}
+
+/* ================= RENDER ================= */
 function loadVideos() {
     grid.innerHTML = "";
 
-    videos.forEach(video => {
+    videos.forEach(v => {
         const card = document.createElement("div");
         card.className = "card";
 
-        const thumb = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
+        const thumb = `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`;
 
         card.innerHTML = `
             <img class="thumbnail" src="${thumb}">
-            <div style="padding:10px">
-                ${video.id}<br>
-                <small>av ${video.owner}</small>
-            </div>
+            <div style="padding:10px">${v.id}</div>
         `;
 
-        card.onclick = () => openVideo(video.id);
-
-        if (currentUser && video.owner === currentUser) {
-            const del = document.createElement("button");
-            del.className = "delete";
-            del.innerText = "✖";
-
-            del.onclick = (e) => {
-                e.stopPropagation();
-
-                videos = videos.filter(v =>
-                    !(v.id === video.id && v.owner === video.owner)
-                );
-
-                saveVideos();
-                refresh();
-            };
-
-            card.appendChild(del);
-        }
+        card.onclick = () => openVideo(v.id);
 
         grid.appendChild(card);
     });
 }
 
-/* VIDEO PLAYER (FULLSCREEN FIX) */
+/* ================= PLAYER ================= */
 function openVideo(id) {
     modal.style.display = "flex";
     player.src = `https://www.youtube.com/embed/${id}?autoplay=1&fs=1`;
 }
 
-/* CLOSE */
 modal.onclick = () => {
     modal.style.display = "none";
     player.src = "";
 };
 
-/* REFRESH */
-function refresh() {
-    updateUI();
-    loadVideos();
-}
-
-/* AUTO LOAD */
-refresh();
+/* INIT */
+loadVideos();
 
 </script>
 
