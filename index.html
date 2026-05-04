@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<title>Youtube unblocked</title>
+<title>Video App</title>
 
 <style>
 body {
@@ -22,22 +22,10 @@ body {
     align-items: center;
 }
 
-/* LOGIN PANEL (hidden by default) */
-#loginPanel {
-    display: none;
-    position: absolute;
-    top: 60px;
-    background: #222;
-    padding: 15px;
-    border-radius: 10px;
-}
-
-/* INPUTS */
 input {
     padding: 10px;
     border-radius: 5px;
     border: none;
-    margin: 5px;
 }
 
 button {
@@ -47,6 +35,16 @@ button {
     color: white;
     cursor: pointer;
     border-radius: 5px;
+}
+
+/* LOGIN PANEL */
+#loginPanel {
+    display: none;
+    position: absolute;
+    top: 60px;
+    background: #222;
+    padding: 15px;
+    border-radius: 10px;
 }
 
 /* GRID */
@@ -69,6 +67,7 @@ button {
     width: 100%;
 }
 
+/* DELETE BUTTON */
 .delete {
     position: absolute;
     top: 8px;
@@ -100,7 +99,7 @@ button {
 
 <body>
 
-<!-- TOP BAR -->
+<!-- TOPBAR -->
 <div class="topbar">
 
     <button onclick="toggleLogin()">Logga in / Konto</button>
@@ -108,14 +107,14 @@ button {
     <span id="userText"></span>
 
     <input id="videoId" placeholder="YouTube ID">
-    <button onclick="addVideo()">Lägg till video</button>
+    <button onclick="addVideo()">Lägg till</button>
 
 </div>
 
-<!-- LOGIN PANEL -->
+<!-- LOGIN -->
 <div id="loginPanel">
-    <input id="username" placeholder="Användarnamn"><br>
-    <input id="password" type="password" placeholder="Lösenord"><br>
+    <input id="username" placeholder="Användarnamn"><br><br>
+    <input id="password" type="password" placeholder="Lösenord"><br><br>
     <button onclick="register()">Skapa konto</button>
     <button onclick="login()">Logga in</button>
 </div>
@@ -123,7 +122,7 @@ button {
 <!-- VIDEOS -->
 <div class="grid" id="grid"></div>
 
-<!-- MODAL -->
+<!-- PLAYER -->
 <div class="modal" id="modal">
     <iframe id="player"></iframe>
 </div>
@@ -135,6 +134,7 @@ let users = JSON.parse(localStorage.getItem("users")) || [];
 let currentUser = localStorage.getItem("currentUser") || null;
 let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
+/* SAVE */
 function saveUsers() {
     localStorage.setItem("users", JSON.stringify(users));
 }
@@ -143,10 +143,10 @@ function saveVideos() {
     localStorage.setItem("videos", JSON.stringify(videos));
 }
 
-/* LOGIN UI TOGGLE */
+/* LOGIN PANEL */
 function toggleLogin() {
-    const panel = document.getElementById("loginPanel");
-    panel.style.display = panel.style.display === "block" ? "none" : "block";
+    const p = document.getElementById("loginPanel");
+    p.style.display = p.style.display === "block" ? "none" : "block";
 }
 
 /* AUTH */
@@ -175,7 +175,7 @@ function login() {
     currentUser = u;
     localStorage.setItem("currentUser", currentUser);
 
-    updateUI();
+    refresh();
 }
 
 /* UI */
@@ -183,55 +183,61 @@ function updateUI() {
     userText.innerText = currentUser ? "Inloggad: " + currentUser : "Inte inloggad";
 }
 
-updateUI();
-
-/* ADD VIDEO (ONLY LOGGED IN) */
+/* VIDEO ADD */
 function addVideo() {
-    if (!currentUser) return alert("Logga in först!");
+    if (!currentUser) return alert("Du måste logga in!");
 
     const id = videoId.value;
     if (!id) return;
 
-    const video = {
+    videos.push({
         id,
         owner: currentUser
-    };
+    });
 
-    videos.push(video);
     saveVideos();
-    createCard(video);
+    refresh();
 
     videoId.value = "";
 }
 
-/* CARD */
-function createCard(video) {
-    const card = document.createElement("div");
-    card.className = "card";
+/* RENDER FIX (VIKTIG) */
+function loadVideos() {
+    grid.innerHTML = "";
 
-    const thumb = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
+    videos.forEach(video => {
+        const card = document.createElement("div");
+        card.className = "card";
 
-    card.innerHTML = `
-        ${video.owner === currentUser ? '<button class="delete">✖</button>' : ''}
-        <img class="thumbnail" src="${thumb}">
-        <div style="padding:10px">
-            ${video.id} <br>
-            <small>${video.owner}</small>
-        </div>
-    `;
+        const thumb = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
 
-    card.onclick = () => openVideo(video.id);
+        card.innerHTML = `
+            <img class="thumbnail" src="${thumb}">
+            <div style="padding:10px">
+                ${video.id}<br>
+                <small>av ${video.owner}</small>
+            </div>
+        `;
 
-    if (video.owner === currentUser) {
-        card.querySelector(".delete").onclick = (e) => {
-            e.stopPropagation();
-            videos = videos.filter(v => v !== video);
-            saveVideos();
-            card.remove();
-        };
-    }
+        card.onclick = () => openVideo(video.id);
 
-    grid.appendChild(card);
+        if (currentUser && video.owner === currentUser) {
+            const del = document.createElement("button");
+            del.className = "delete";
+            del.innerText = "✖";
+
+            del.onclick = (e) => {
+                e.stopPropagation();
+                videos = videos.filter(v => v !== video);
+                saveVideos();
+                refresh();
+            };
+
+            card.appendChild(del);
+        }
+
+        grid.appendChild(card);
+    });
 }
 
 /* PLAYER */
@@ -245,8 +251,15 @@ modal.onclick = () => {
     player.src = "";
 };
 
-/* LOAD */
-videos.forEach(v => createCard(v));
+/* REFRESH SYSTEM */
+function refresh() {
+    updateUI();
+    loadVideos();
+}
+
+/* AUTO LOGIN */
+if (currentUser) refresh();
+else loadVideos();
 
 </script>
 
