@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<title>Video App</title>
+<title>Youtube unblocked</title>
 
 <style>
 body {
@@ -12,14 +12,32 @@ body {
     color: white;
 }
 
-#authScreen {
-    display: none; /* vi behöver inte blockera hela sidan längre */
+/* TOP BAR */
+.topbar {
+    padding: 10px;
+    background: #111;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
 }
 
+/* LOGIN PANEL (hidden by default) */
+#loginPanel {
+    display: none;
+    position: absolute;
+    top: 60px;
+    background: #222;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* INPUTS */
 input {
     padding: 10px;
     border-radius: 5px;
     border: none;
+    margin: 5px;
 }
 
 button {
@@ -31,15 +49,7 @@ button {
     border-radius: 5px;
 }
 
-header {
-    padding: 15px;
-    background: #202020;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-}
-
+/* GRID */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -70,7 +80,7 @@ header {
     padding: 5px;
 }
 
-/* modal */
+/* MODAL */
 .modal {
     display: none;
     position: fixed;
@@ -90,21 +100,27 @@ header {
 
 <body>
 
-<!-- LOGIN BAR (inte blockande) -->
-<div style="padding:10px; background:#111; display:flex; gap:10px; justify-content:center;">
-    <input id="username" placeholder="Användarnamn">
-    <input id="password" type="password" placeholder="Lösenord">
-    <button onclick="register()">Skapa konto</button>
-    <button onclick="login()">Logga in</button>
-    <span id="userText"></span>
-</div>
+<!-- TOP BAR -->
+<div class="topbar">
 
-<!-- HEADER -->
-<header>
+    <button onclick="toggleLogin()">Logga in / Konto</button>
+
+    <span id="userText"></span>
+
     <input id="videoId" placeholder="YouTube ID">
     <button onclick="addVideo()">Lägg till video</button>
-</header>
 
+</div>
+
+<!-- LOGIN PANEL -->
+<div id="loginPanel">
+    <input id="username" placeholder="Användarnamn"><br>
+    <input id="password" type="password" placeholder="Lösenord"><br>
+    <button onclick="register()">Skapa konto</button>
+    <button onclick="login()">Logga in</button>
+</div>
+
+<!-- VIDEOS -->
 <div class="grid" id="grid"></div>
 
 <!-- MODAL -->
@@ -114,11 +130,9 @@ header {
 
 <script>
 
-/* USERS */
+/* DATA */
 let users = JSON.parse(localStorage.getItem("users")) || [];
 let currentUser = localStorage.getItem("currentUser") || null;
-
-/* VIDEOS */
 let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
 function saveUsers() {
@@ -127,6 +141,12 @@ function saveUsers() {
 
 function saveVideos() {
     localStorage.setItem("videos", JSON.stringify(videos));
+}
+
+/* LOGIN UI TOGGLE */
+function toggleLogin() {
+    const panel = document.getElementById("loginPanel");
+    panel.style.display = panel.style.display === "block" ? "none" : "block";
 }
 
 /* AUTH */
@@ -158,18 +178,16 @@ function login() {
     updateUI();
 }
 
+/* UI */
 function updateUI() {
     userText.innerText = currentUser ? "Inloggad: " + currentUser : "Inte inloggad";
 }
 
 updateUI();
 
-/* ADD VIDEO (KRÄVER LOGIN) */
+/* ADD VIDEO (ONLY LOGGED IN) */
 function addVideo() {
-    if (!currentUser) {
-        alert("Du måste vara inloggad för att lägga till videor!");
-        return;
-    }
+    if (!currentUser) return alert("Logga in först!");
 
     const id = videoId.value;
     if (!id) return;
@@ -186,7 +204,7 @@ function addVideo() {
     videoId.value = "";
 }
 
-/* CREATE CARD */
+/* CARD */
 function createCard(video) {
     const card = document.createElement("div");
     card.className = "card";
@@ -198,7 +216,7 @@ function createCard(video) {
         <img class="thumbnail" src="${thumb}">
         <div style="padding:10px">
             ${video.id} <br>
-            <small>av ${video.owner}</small>
+            <small>${video.owner}</small>
         </div>
     `;
 
@@ -227,7 +245,7 @@ modal.onclick = () => {
     player.src = "";
 };
 
-/* LOAD VIDEOS (ALLA KAN SE) */
+/* LOAD */
 videos.forEach(v => createCard(v));
 
 </script>
