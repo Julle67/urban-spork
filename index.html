@@ -2,51 +2,44 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<title>Youtube Unblocked</title>
+<title>Video App</title>
 
 <style>
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     background: #0f0f0f;
     color: white;
 }
 
-/* LOGIN BAR */
-#auth {
-    padding: 10px;
-    background: #111;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
+#authScreen {
+    display: none; /* vi behöver inte blockera hela sidan längre */
 }
 
 input {
     padding: 10px;
-    border-radius: 4px;
+    border-radius: 5px;
     border: none;
 }
 
 button {
     padding: 10px;
     background: red;
-    color: white;
     border: none;
-    border-radius: 4px;
+    color: white;
     cursor: pointer;
+    border-radius: 5px;
 }
 
-/* HEADER */
 header {
     padding: 15px;
     background: #202020;
     display: flex;
-    justify-content: center;
     gap: 10px;
+    justify-content: center;
+    align-items: center;
 }
 
-/* GRID */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -58,20 +51,14 @@ header {
     background: #181818;
     border-radius: 10px;
     overflow: hidden;
-    cursor: pointer;
     position: relative;
+    cursor: pointer;
 }
 
 .thumbnail {
     width: 100%;
 }
 
-.title {
-    padding: 10px;
-    font-size: 14px;
-}
-
-/* DELETE */
 .delete {
     position: absolute;
     top: 8px;
@@ -81,17 +68,14 @@ header {
     color: white;
     cursor: pointer;
     padding: 5px;
-    border-radius: 5px;
 }
 
-/* MODAL */
+/* modal */
 .modal {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background: rgba(0,0,0,0.9);
     justify-content: center;
     align-items: center;
@@ -101,31 +85,23 @@ header {
     width: 80%;
     height: 80%;
 }
-
-.close {
-    position: absolute;
-    top: 20px;
-    right: 30px;
-    font-size: 30px;
-    cursor: pointer;
-}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="auth">
+<!-- LOGIN BAR (inte blockande) -->
+<div style="padding:10px; background:#111; display:flex; gap:10px; justify-content:center;">
     <input id="username" placeholder="Användarnamn">
     <input id="password" type="password" placeholder="Lösenord">
-    <button onclick="register()">Registrera</button>
+    <button onclick="register()">Skapa konto</button>
     <button onclick="login()">Logga in</button>
-    <span id="currentUser"></span>
+    <span id="userText"></span>
 </div>
 
-<!-- UPLOAD -->
+<!-- HEADER -->
 <header>
-    <input type="text" id="videoId" placeholder="YouTube ID">
+    <input id="videoId" placeholder="YouTube ID">
     <button onclick="addVideo()">Lägg till video</button>
 </header>
 
@@ -133,90 +109,97 @@ header {
 
 <!-- MODAL -->
 <div class="modal" id="modal">
-    <span class="close" onclick="closeVideo()">✖</span>
-    <iframe id="player" src="" allowfullscreen></iframe>
+    <iframe id="player"></iframe>
 </div>
 
 <script>
-/* ---------------- USERS ---------------- */
+
+/* USERS */
 let users = JSON.parse(localStorage.getItem("users")) || [];
 let currentUser = localStorage.getItem("currentUser") || null;
+
+/* VIDEOS */
+let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
 function saveUsers() {
     localStorage.setItem("users", JSON.stringify(users));
 }
 
-function updateUI() {
-    document.getElementById("currentUser").innerText =
-        currentUser ? "Inloggad: " + currentUser : "Inte inloggad";
+function saveVideos() {
+    localStorage.setItem("videos", JSON.stringify(videos));
 }
 
-updateUI();
-
-/* ---------------- AUTH ---------------- */
+/* AUTH */
 function register() {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+    const u = username.value;
+    const p = password.value;
 
-    if (!username || !password) return alert("Fyll i allt");
+    if (!u || !p) return alert("Fyll i allt");
 
-    if (users.find(u => u.username === username)) {
-        return alert("Användaren finns redan");
-    }
+    if (users.find(x => x.username === u))
+        return alert("Finns redan");
 
-    users.push({ username, password });
+    users.push({ username: u, password: p });
     saveUsers();
     alert("Konto skapat!");
 }
 
 function login() {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+    const u = username.value;
+    const p = password.value;
 
-    const user = users.find(u => u.username === username && u.password === password);
+    const user = users.find(x => x.username === u && x.password === p);
 
-    if (!user) return alert("Fel inloggning");
+    if (!user) return alert("Fel login");
 
-    currentUser = username;
+    currentUser = u;
     localStorage.setItem("currentUser", currentUser);
+
     updateUI();
 }
 
-/* ---------------- VIDEOS ---------------- */
-let videos = JSON.parse(localStorage.getItem("videos")) || [];
-
-function saveVideos() {
-    localStorage.setItem("videos", JSON.stringify(videos));
+function updateUI() {
+    userText.innerText = currentUser ? "Inloggad: " + currentUser : "Inte inloggad";
 }
 
-function addVideo() {
-    if (!currentUser) return alert("Logga in först!");
+updateUI();
 
-    const id = document.getElementById("videoId").value;
+/* ADD VIDEO (KRÄVER LOGIN) */
+function addVideo() {
+    if (!currentUser) {
+        alert("Du måste vara inloggad för att lägga till videor!");
+        return;
+    }
+
+    const id = videoId.value;
     if (!id) return;
 
-    const videoObj = {
-        id: id,
+    const video = {
+        id,
         owner: currentUser
     };
 
-    videos.push(videoObj);
+    videos.push(video);
     saveVideos();
-    createCard(videoObj);
+    createCard(video);
 
-    document.getElementById("videoId").value = "";
+    videoId.value = "";
 }
 
+/* CREATE CARD */
 function createCard(video) {
     const card = document.createElement("div");
     card.className = "card";
 
-    const thumbnail = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
+    const thumb = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
 
     card.innerHTML = `
         ${video.owner === currentUser ? '<button class="delete">✖</button>' : ''}
-        <img class="thumbnail" src="${thumbnail}">
-        <div class="title">${video.id} (av ${video.owner})</div>
+        <img class="thumbnail" src="${thumb}">
+        <div style="padding:10px">
+            ${video.id} <br>
+            <small>av ${video.owner}</small>
+        </div>
     `;
 
     card.onclick = () => openVideo(video.id);
@@ -230,23 +213,23 @@ function createCard(video) {
         };
     }
 
-    document.getElementById("grid").appendChild(card);
+    grid.appendChild(card);
 }
 
-/* ---------------- PLAYER ---------------- */
+/* PLAYER */
 function openVideo(id) {
-    document.getElementById("modal").style.display = "flex";
-    document.getElementById("player").src =
-        `https://www.youtube.com/embed/${id}?autoplay=1`;
+    modal.style.display = "flex";
+    player.src = `https://www.youtube.com/embed/${id}`;
 }
 
-function closeVideo() {
-    document.getElementById("modal").style.display = "none";
-    document.getElementById("player").src = "";
-}
+modal.onclick = () => {
+    modal.style.display = "none";
+    player.src = "";
+};
 
-/* LOAD VIDEOS */
+/* LOAD VIDEOS (ALLA KAN SE) */
 videos.forEach(v => createCard(v));
+
 </script>
 
 </body>
