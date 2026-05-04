@@ -1,151 +1,135 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
+<title>Min Video Grid</title>
 
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f0f0f;
+    color: white;
+}
 
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
+header {
+    padding: 15px;
+    background: #202020;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
 
-    body {
-      background: radial-gradient(circle, #020024 0%, #000000 42%, #00d4ff 100%);
-    }
-  </style>
-</head>
-<body>
+input {
+    padding: 10px;
+    width: 300px;
+    border-radius: 4px;
+    border: none;
+}
 
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="sv">
-<head>
-  <meta charset="UTF-8">
-  <title>Very Cool Button</title>
+button {
+    padding: 10px;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
 
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #f0f0f0;
-    }
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
 
-    button {
-      padding: 15px 30px;
-      font-size: 18px;
-      cursor: pointer;
-      border: none;
-      border-radius: 25px;
-      background: linear-gradient(45deg, #4CAF50, #45a049);
-      color: white;
-      transition: 0.3s;
-    }
+.card {
+    background: #181818;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+}
 
-    button:hover {
-      transform: scale(1.1);
-    }
+.thumbnail {
+    width: 100%;
+}
 
-    /* POPUP */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
-    }
+.title {
+    padding: 10px;
+    font-size: 14px;
+}
 
-    .modal-content {
-      position: relative;
-      background: black;
-      padding: 10px;
-      border-radius: 15px;
-    }
+/* Modal (popup video) */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+}
 
-    iframe {
-      width: 600px;
-      height: 340px;
-      border-radius: 10px;
-    }
+.modal iframe {
+    width: 80%;
+    height: 80%;
+}
 
-    .close {
-      position: absolute;
-      top: -10px;
-      right: -10px;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: none;
-      background: red;
-      color: white;
-      cursor: pointer;
-    }
-
-    .fullscreen {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      background: rgba(255,255,255,0.7);
-    }
-  </style>
+.close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 30px;
+    cursor: pointer;
+}
+</style>
 </head>
 
 <body>
 
-<button onclick="openModal()">Very Cool Button</button>
+<header>
+    <input type="text" id="videoId" placeholder="YouTube ID (t.ex EeSlGlaK-Cg)">
+    <button onclick="addVideo()">Lägg till</button>
+</header>
 
-<div id="myModal" class="modal">
-  <div class="modal-content">
-    <button class="close" onclick="closeModal()">×</button>
+<div class="grid" id="grid"></div>
 
-    <iframe id="myVideo"
-      src=""
-      frameborder="0"
-      allow="autoplay; fullscreen"
-      allowfullscreen>
-    </iframe>
-
-    <button class="fullscreen" onclick="goFullscreen()">⛶</button>
-  </div>
+<!-- Popup video -->
+<div class="modal" id="modal">
+    <span class="close" onclick="closeVideo()">✖</span>
+    <iframe id="player" src="" allowfullscreen></iframe>
 </div>
 
 <script>
-const videoID = "EeSlGlaK-Cg"; // <-- BYT TILL DIN YOUTUBE ID
+function addVideo() {
+    const id = document.getElementById("videoId").value;
+    if (!id) return;
 
-function openModal() {
-  const modal = document.getElementById("myModal");
-  const iframe = document.getElementById("myVideo");
+    const card = document.createElement("div");
+    card.className = "card";
 
-  iframe.src = `https://www.youtube.com/embed/${videoID}?autoplay=1`;
-  modal.style.display = "flex";
+    const thumbnail = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+
+    card.innerHTML = `
+        <img class="thumbnail" src="${thumbnail}">
+        <div class="title">Video ID: ${id}</div>
+    `;
+
+    card.onclick = () => openVideo(id);
+
+    document.getElementById("grid").appendChild(card);
 }
 
-function closeModal() {
-  const modal = document.getElementById("myModal");
-  const iframe = document.getElementById("myVideo");
-
-  modal.style.display = "none";
-  iframe.src = ""; // stoppar videon
+function openVideo(id) {
+    document.getElementById("modal").style.display = "flex";
+    document.getElementById("player").src = `https://www.youtube.com/embed/${id}?autoplay=1`;
 }
 
-function goFullscreen() {
-  const iframe = document.getElementById("myVideo");
-
-  if (iframe.requestFullscreen) {
-    iframe.requestFullscreen();
-  }
+function closeVideo() {
+    document.getElementById("modal").style.display = "none";
+    document.getElementById("player").src = "";
 }
 </script>
 
