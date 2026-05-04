@@ -48,6 +48,7 @@ button {
     border-radius: 10px;
     overflow: hidden;
     cursor: pointer;
+    position: relative;
 }
 
 .thumbnail {
@@ -59,7 +60,20 @@ button {
     font-size: 14px;
 }
 
-/* Modal (popup video) */
+/* delete button */
+.delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.7);
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+/* modal */
 .modal {
     display: none;
     position: fixed;
@@ -96,30 +110,52 @@ button {
 
 <div class="grid" id="grid"></div>
 
-<!-- Popup video -->
 <div class="modal" id="modal">
     <span class="close" onclick="closeVideo()">✖</span>
     <iframe id="player" src="" allowfullscreen></iframe>
 </div>
 
 <script>
-function addVideo() {
-    const id = document.getElementById("videoId").value;
-    if (!id) return;
+let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
+function saveVideos() {
+    localStorage.setItem("videos", JSON.stringify(videos));
+}
+
+function createCard(id) {
     const card = document.createElement("div");
     card.className = "card";
 
     const thumbnail = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
 
     card.innerHTML = `
+        <button class="delete">✖</button>
         <img class="thumbnail" src="${thumbnail}">
         <div class="title">Video ID: ${id}</div>
     `;
 
     card.onclick = () => openVideo(id);
 
+    // delete knapp
+    card.querySelector(".delete").onclick = (e) => {
+        e.stopPropagation();
+        videos = videos.filter(v => v !== id);
+        saveVideos();
+        card.remove();
+    };
+
     document.getElementById("grid").appendChild(card);
+}
+
+function addVideo() {
+    const id = document.getElementById("videoId").value;
+    if (!id) return;
+
+    videos.push(id);
+    saveVideos();
+    createCard(id);
+
+    document.getElementById("videoId").value = "";
 }
 
 function openVideo(id) {
@@ -131,6 +167,9 @@ function closeVideo() {
     document.getElementById("modal").style.display = "none";
     document.getElementById("player").src = "";
 }
+
+// ladda sparade videos när sidan startar
+videos.forEach(id => createCard(id));
 </script>
 
 </body>
