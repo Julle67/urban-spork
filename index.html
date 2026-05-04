@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<title>Youtube unblocked</title>
+<title>Youtube Unblocked</title>
 
 <style>
 body {
@@ -12,17 +12,18 @@ body {
     color: white;
 }
 
-header {
-    padding: 15px;
-    background: #202020;
+/* LOGIN BAR */
+#auth {
+    padding: 10px;
+    background: #111;
     display: flex;
-    justify-content: center;
     gap: 10px;
+    justify-content: center;
+    align-items: center;
 }
 
 input {
     padding: 10px;
-    width: 300px;
     border-radius: 4px;
     border: none;
 }
@@ -36,6 +37,16 @@ button {
     cursor: pointer;
 }
 
+/* HEADER */
+header {
+    padding: 15px;
+    background: #202020;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* GRID */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -60,7 +71,7 @@ button {
     font-size: 14px;
 }
 
-/* delete button */
+/* DELETE */
 .delete {
     position: absolute;
     top: 8px;
@@ -73,7 +84,7 @@ button {
     border-radius: 5px;
 }
 
-/* modal */
+/* MODAL */
 .modal {
     display: none;
     position: fixed;
@@ -103,64 +114,130 @@ button {
 
 <body>
 
+<!-- LOGIN -->
+<div id="auth">
+    <input id="username" placeholder="Användarnamn">
+    <input id="password" type="password" placeholder="Lösenord">
+    <button onclick="register()">Registrera</button>
+    <button onclick="login()">Logga in</button>
+    <span id="currentUser"></span>
+</div>
+
+<!-- UPLOAD -->
 <header>
-    <input type="text" id="videoId" placeholder="YouTube ID (t.ex EeSlGlaK-Cg)">
-    <button onclick="addVideo()">Lägg till</button>
+    <input type="text" id="videoId" placeholder="YouTube ID">
+    <button onclick="addVideo()">Lägg till video</button>
 </header>
 
 <div class="grid" id="grid"></div>
 
+<!-- MODAL -->
 <div class="modal" id="modal">
     <span class="close" onclick="closeVideo()">✖</span>
     <iframe id="player" src="" allowfullscreen></iframe>
 </div>
 
 <script>
+/* ---------------- USERS ---------------- */
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let currentUser = localStorage.getItem("currentUser") || null;
+
+function saveUsers() {
+    localStorage.setItem("users", JSON.stringify(users));
+}
+
+function updateUI() {
+    document.getElementById("currentUser").innerText =
+        currentUser ? "Inloggad: " + currentUser : "Inte inloggad";
+}
+
+updateUI();
+
+/* ---------------- AUTH ---------------- */
+function register() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    if (!username || !password) return alert("Fyll i allt");
+
+    if (users.find(u => u.username === username)) {
+        return alert("Användaren finns redan");
+    }
+
+    users.push({ username, password });
+    saveUsers();
+    alert("Konto skapat!");
+}
+
+function login() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const user = users.find(u => u.username === username && u.password === password);
+
+    if (!user) return alert("Fel inloggning");
+
+    currentUser = username;
+    localStorage.setItem("currentUser", currentUser);
+    updateUI();
+}
+
+/* ---------------- VIDEOS ---------------- */
 let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
 function saveVideos() {
     localStorage.setItem("videos", JSON.stringify(videos));
 }
 
-function createCard(id) {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    const thumbnail = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-
-    card.innerHTML = `
-        <button class="delete">✖</button>
-        <img class="thumbnail" src="${thumbnail}">
-        <div class="title">Video ID: ${id}</div>
-    `;
-
-    card.onclick = () => openVideo(id);
-
-    // delete knapp
-    card.querySelector(".delete").onclick = (e) => {
-        e.stopPropagation();
-        videos = videos.filter(v => v !== id);
-        saveVideos();
-        card.remove();
-    };
-
-    document.getElementById("grid").appendChild(card);
-}
-
 function addVideo() {
+    if (!currentUser) return alert("Logga in först!");
+
     const id = document.getElementById("videoId").value;
     if (!id) return;
 
-    videos.push(id);
+    const videoObj = {
+        id: id,
+        owner: currentUser
+    };
+
+    videos.push(videoObj);
     saveVideos();
-    createCard(id);
+    createCard(videoObj);
 
     document.getElementById("videoId").value = "";
 }
 
+function createCard(video) {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const thumbnail = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
+
+    card.innerHTML = `
+        ${video.owner === currentUser ? '<button class="delete">✖</button>' : ''}
+        <img class="thumbnail" src="${thumbnail}">
+        <div class="title">${video.id} (av ${video.owner})</div>
+    `;
+
+    card.onclick = () => openVideo(video.id);
+
+    if (video.owner === currentUser) {
+        card.querySelector(".delete").onclick = (e) => {
+            e.stopPropagation();
+            videos = videos.filter(v => v !== video);
+            saveVideos();
+            card.remove();
+        };
+    }
+
+    document.getElementById("grid").appendChild(card);
+}
+
+/* ---------------- PLAYER ---------------- */
 function openVideo(id) {
     document.getElementById("modal").style.display = "flex";
-    document.getElementById("player").src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+    document.getElementById("player").src =
+        `https://www.youtube.com/embed/${id}?autoplay=1`;
 }
 
 function closeVideo() {
@@ -168,8 +245,8 @@ function closeVideo() {
     document.getElementById("player").src = "";
 }
 
-// ladda sparade videos när sidan startar
-videos.forEach(id => createCard(id));
+/* LOAD VIDEOS */
+videos.forEach(v => createCard(v));
 </script>
 
 </body>
