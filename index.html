@@ -12,7 +12,7 @@ body {
     color: white;
 }
 
-/* TOP BAR */
+/* TOPBAR */
 .topbar {
     padding: 10px;
     background: #111;
@@ -37,7 +37,7 @@ button {
     border-radius: 5px;
 }
 
-/* LOGIN PANEL */
+/* LOGIN */
 #loginPanel {
     display: none;
     position: absolute;
@@ -67,7 +67,6 @@ button {
     width: 100%;
 }
 
-/* DELETE BUTTON */
 .delete {
     position: absolute;
     top: 8px;
@@ -84,8 +83,9 @@ button {
     display: none;
     position: fixed;
     top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9);
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
     justify-content: center;
     align-items: center;
 }
@@ -111,7 +111,7 @@ button {
 
 </div>
 
-<!-- LOGIN -->
+<!-- LOGIN PANEL -->
 <div id="loginPanel">
     <input id="username" placeholder="Användarnamn"><br><br>
     <input id="password" type="password" placeholder="Lösenord"><br><br>
@@ -124,7 +124,7 @@ button {
 
 <!-- PLAYER -->
 <div class="modal" id="modal">
-    <iframe id="player"></iframe>
+    <iframe id="player" allow="autoplay; fullscreen" allowfullscreen></iframe>
 </div>
 
 <script>
@@ -143,7 +143,7 @@ function saveVideos() {
     localStorage.setItem("videos", JSON.stringify(videos));
 }
 
-/* LOGIN PANEL */
+/* LOGIN TOGGLE */
 function toggleLogin() {
     const p = document.getElementById("loginPanel");
     p.style.display = p.style.display === "block" ? "none" : "block";
@@ -183,16 +183,17 @@ function updateUI() {
     userText.innerText = currentUser ? "Inloggad: " + currentUser : "Inte inloggad";
 }
 
-/* VIDEO ADD */
+/* ADD VIDEO */
 function addVideo() {
-    if (!currentUser) return alert("Du måste logga in!");
+    if (!currentUser) return alert("Logga in först!");
 
     const id = videoId.value;
     if (!id) return;
 
     videos.push({
         id,
-        owner: currentUser
+        owner: currentUser,
+        created: Date.now()
     });
 
     saveVideos();
@@ -201,7 +202,7 @@ function addVideo() {
     videoId.value = "";
 }
 
-/* RENDER FIX (VIKTIG) */
+/* RENDER FIX */
 function loadVideos() {
     grid.innerHTML = "";
 
@@ -228,7 +229,11 @@ function loadVideos() {
 
             del.onclick = (e) => {
                 e.stopPropagation();
-                videos = videos.filter(v => v !== video);
+
+                videos = videos.filter(v =>
+                    !(v.id === video.id && v.owner === video.owner)
+                );
+
                 saveVideos();
                 refresh();
             };
@@ -240,26 +245,26 @@ function loadVideos() {
     });
 }
 
-/* PLAYER */
+/* VIDEO PLAYER (FULLSCREEN FIX) */
 function openVideo(id) {
     modal.style.display = "flex";
-    player.src = `https://www.youtube.com/embed/${id}`;
+    player.src = `https://www.youtube.com/embed/${id}?autoplay=1&fs=1`;
 }
 
+/* CLOSE */
 modal.onclick = () => {
     modal.style.display = "none";
     player.src = "";
 };
 
-/* REFRESH SYSTEM */
+/* REFRESH */
 function refresh() {
     updateUI();
     loadVideos();
 }
 
-/* AUTO LOGIN */
-if (currentUser) refresh();
-else loadVideos();
+/* AUTO LOAD */
+refresh();
 
 </script>
 
