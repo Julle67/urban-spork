@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<title>Pro Video App</title>
+<title>Video Hub</title>
 
 <style>
 body {
@@ -12,9 +12,9 @@ body {
     color: white;
 }
 
-/* TOPBAR */
+/* TOP */
 .topbar {
-    padding: 12px;
+    padding: 10px;
     background: #111;
     display: flex;
     gap: 8px;
@@ -69,10 +69,9 @@ button {
 
 .card div {
     padding: 10px;
-    font-size: 14px;
 }
 
-/* buttons */
+/* BUTTONS */
 .delete {
     position: absolute;
     top: 6px;
@@ -95,32 +94,42 @@ button {
     border-radius: 6px;
 }
 
-/* MODAL */
-.modal {
+/* PLAYER (TIKTOK STYLE) */
+.playerView {
     display: none;
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-.modal iframe {
-    width: 80%;
-    height: 80%;
+iframe {
+    width: 90%;
+    height: 70%;
     border: none;
+}
+
+.nav {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.nav button {
+    background: #333;
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOPBAR -->
+<!-- TOP -->
 <div class="topbar">
-    <input id="search" placeholder="Sök video">
-    <button onclick="searchVideos()">Sök</button>
-
     <input id="videoId" placeholder="YouTube ID">
     <button onclick="addVideo()">Lägg till</button>
 </div>
@@ -129,8 +138,14 @@ button {
 <div class="grid" id="grid"></div>
 
 <!-- PLAYER -->
-<div class="modal" id="modal">
-    <iframe id="player" allow="autoplay; fullscreen" allowfullscreen></iframe>
+<div class="playerView" id="playerView">
+    <iframe id="player" allow="autoplay; fullscreen"></iframe>
+
+    <div class="nav">
+        <button onclick="prevVideo()">⬆ Föregående</button>
+        <button onclick="nextVideo()">⬇ Nästa</button>
+        <button onclick="closePlayer()">Stäng</button>
+    </div>
 </div>
 
 <script>
@@ -139,20 +154,22 @@ button {
 let videos = JSON.parse(localStorage.getItem("videos")) || [];
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
+let currentIndex = 0;
+
 /* ================= SAVE ================= */
 function save() {
     localStorage.setItem("videos", JSON.stringify(videos));
     localStorage.setItem("favorites", JSON.stringify(favorites));
 }
 
-/* ================= ADD VIDEO ================= */
+/* ================= ADD ================= */
 function addVideo() {
     const id = document.getElementById("videoId").value.trim();
     if (!id) return;
 
     videos.push({ id });
     save();
-    loadVideos();
+    load();
 }
 
 /* ================= FAVORITE ================= */
@@ -163,27 +180,15 @@ function toggleFav(id) {
         favorites.push(id);
     }
     save();
-    loadVideos();
-}
-
-/* ================= SEARCH (REAL YOUTUBE OPEN) ================= */
-function searchVideos() {
-    const query = document.getElementById("search").value;
-    if (!query) return;
-
-    // RIKTIG sök på YouTube (inte fake)
-    window.open(
-        `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
-        "_blank"
-    );
+    load();
 }
 
 /* ================= LOAD ================= */
-function loadVideos() {
+function load() {
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
 
-    videos.forEach((v, index) => {
+    videos.forEach((v, i) => {
 
         const card = document.createElement("div");
         card.className = "card";
@@ -195,17 +200,15 @@ function loadVideos() {
             <div>${v.id}</div>
         `;
 
-        card.onclick = () => openVideo(v.id);
+        card.onclick = () => openPlayer(i);
 
-        // delete
         card.querySelector(".delete").onclick = (e) => {
             e.stopPropagation();
-            videos.splice(index, 1);
+            videos.splice(i, 1);
             save();
-            loadVideos();
+            load();
         };
 
-        // favorite
         card.querySelector(".fav").onclick = (e) => {
             e.stopPropagation();
             toggleFav(v.id);
@@ -216,22 +219,37 @@ function loadVideos() {
 }
 
 /* ================= PLAYER ================= */
-function openVideo(id) {
-    const modal = document.getElementById("modal");
+function openPlayer(i) {
+    currentIndex = i;
+
+    const view = document.getElementById("playerView");
     const player = document.getElementById("player");
 
-    modal.style.display = "flex";
-    player.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+    view.style.display = "flex";
+    player.src = `https://www.youtube.com/embed/${videos[i].id}?autoplay=1`;
+}
+
+/* NEXT / PREV */
+function nextVideo() {
+    if (currentIndex < videos.length - 1) {
+        openPlayer(currentIndex + 1);
+    }
+}
+
+function prevVideo() {
+    if (currentIndex > 0) {
+        openPlayer(currentIndex - 1);
+    }
 }
 
 /* CLOSE */
-document.getElementById("modal").onclick = () => {
-    document.getElementById("modal").style.display = "none";
+function closePlayer() {
+    document.getElementById("playerView").style.display = "none";
     document.getElementById("player").src = "";
-};
+}
 
 /* INIT */
-loadVideos();
+load();
 
 </script>
 
