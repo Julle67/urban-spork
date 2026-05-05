@@ -7,54 +7,98 @@
 <style>
 body {
     margin: 0;
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     background: #0f0f0f;
     color: white;
 }
 
+/* TOPBAR */
 .topbar {
-    padding: 10px;
+    padding: 12px;
     background: #111;
     display: flex;
     gap: 10px;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
+    border-bottom: 1px solid #222;
 }
 
 input {
-    padding: 10px;
-    border-radius: 5px;
+    padding: 10px 12px;
+    border-radius: 8px;
     border: none;
+    outline: none;
+    background: #222;
+    color: white;
 }
 
 button {
-    padding: 10px;
-    background: red;
+    padding: 10px 14px;
+    background: #ff0000;
     border: none;
     color: white;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.2s;
 }
 
+button:hover {
+    background: #cc0000;
+}
+
+/* GRID */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
     padding: 20px;
 }
 
+/* CARD */
 .card {
     background: #181818;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
+    position: relative;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
 }
 
 .card img {
     width: 100%;
+    display: block;
 }
 
+/* TITLE */
+.card div {
+    padding: 10px;
+    font-size: 14px;
+    color: #ddd;
+    word-break: break-word;
+}
+
+/* DELETE BUTTON */
+.card button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255,0,0,0.9);
+    border: none;
+    color: white;
+    padding: 5px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* MODAL */
 .modal {
     display: none;
     position: fixed;
@@ -68,19 +112,23 @@ button {
 .modal iframe {
     width: 80%;
     height: 80%;
+    border: none;
 }
 </style>
 </head>
 
 <body>
 
+<!-- TOPBAR -->
 <div class="topbar">
     <input id="videoId" placeholder="YouTube ID (t.ex dQw4w9WgXcQ)">
     <button onclick="addVideo()">Lägg till</button>
 </div>
 
+<!-- GRID -->
 <div class="grid" id="grid"></div>
 
+<!-- PLAYER -->
 <div class="modal" id="modal">
     <iframe id="player" allow="autoplay; fullscreen" allowfullscreen></iframe>
 </div>
@@ -109,21 +157,32 @@ function addVideo() {
     input.value = "";
 }
 
-/* ================= LOAD ================= */
+/* ================= LOAD VIDEOS ================= */
 function loadVideos() {
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
 
-    videos.forEach(v => {
+    videos.forEach((v, index) => {
         const card = document.createElement("div");
         card.className = "card";
 
         card.innerHTML = `
+            <button>✖</button>
             <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
-            <div style="padding:10px">${v.id}</div>
+            <div>${v.id}</div>
         `;
 
+        /* PLAY VIDEO */
         card.onclick = () => openVideo(v.id);
+
+        /* DELETE BUTTON */
+        const delBtn = card.querySelector("button");
+        delBtn.onclick = (e) => {
+            e.stopPropagation();
+            videos.splice(index, 1);
+            saveVideos();
+            loadVideos();
+        };
 
         grid.appendChild(card);
     });
@@ -138,7 +197,7 @@ function openVideo(id) {
     player.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
 }
 
-/* CLOSE */
+/* CLOSE MODAL */
 document.getElementById("modal").onclick = () => {
     document.getElementById("modal").style.display = "none";
     document.getElementById("player").src = "";
