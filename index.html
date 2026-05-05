@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<title>Video App</title>
+<title>Video Manager</title>
 
 <style>
 body {
@@ -38,6 +38,24 @@ button {
     background: red;
     color: white;
     font-weight: bold;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+}
+
+.tab {
+    padding: 8px 12px;
+    background: #222;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.tab.active {
+    background: red;
 }
 
 .grid {
@@ -78,7 +96,6 @@ button {
     color: white;
     padding: 4px 6px;
     border-radius: 6px;
-    cursor: pointer;
 }
 
 .fav {
@@ -90,10 +107,8 @@ button {
     color: black;
     padding: 4px 6px;
     border-radius: 6px;
-    cursor: pointer;
 }
 
-/* MODAL */
 .modal {
     display: none;
     position: fixed;
@@ -115,11 +130,14 @@ button {
 <body>
 
 <div class="topbar">
-    <input id="username" placeholder="Ditt namn">
-    <button onclick="setUser()">Logga in</button>
-
     <input id="search" placeholder="Sök video">
     <button onclick="searchVideos()">Sök</button>
+    <button onclick="addRandom()">+ Random video</button>
+</div>
+
+<div class="tabs">
+    <div class="tab active" onclick="showTab('all')">Alla</div>
+    <div class="tab" onclick="showTab('fav')">Favoriter</div>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -130,41 +148,38 @@ button {
 
 <script>
 
-/* ================= USER ================= */
-let currentUser = localStorage.getItem("currentUser") || "";
-
-let videos = JSON.parse(localStorage.getItem("videos_" + currentUser)) || [];
-let favorites = JSON.parse(localStorage.getItem("fav_" + currentUser)) || [];
+/* ================= DATA ================= */
+let videos = JSON.parse(localStorage.getItem("videos")) || [];
+let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+let currentTab = "all";
 
 /* ================= SAVE ================= */
 function save() {
-    localStorage.setItem("videos_" + currentUser, JSON.stringify(videos));
-    localStorage.setItem("fav_" + currentUser, JSON.stringify(favorites));
+    localStorage.setItem("videos", JSON.stringify(videos));
+    localStorage.setItem("favorites", JSON.stringify(favorites));
 }
 
-/* ================= LOGIN ================= */
-function setUser() {
-    const name = document.getElementById("username").value.trim();
-    if (!name) return;
+/* ================= RANDOM LIBRARY ================= */
+const library = [
+    "dQw4w9WgXcQ",
+    "9bZkp7q19f0",
+    "kJQP7kiw5Fk",
+    "3JZ_D3ELwOQ",
+    "fJ9rUzIMcZQ",
+    "J---aiyznGQ",
+    "eBGIQ7ZuuiU"
+];
 
-    currentUser = name;
-    localStorage.setItem("currentUser", currentUser);
-
-    videos = JSON.parse(localStorage.getItem("videos_" + currentUser)) || [];
-    favorites = JSON.parse(localStorage.getItem("fav_" + currentUser)) || [];
-
-    loadVideos();
-}
-
-/* ================= ADD ================= */
-function addVideo(id) {
+/* ================= ADD RANDOM ================= */
+function addRandom() {
+    const id = library[Math.floor(Math.random() * library.length)];
     videos.push({ id });
     save();
     loadVideos();
 }
 
 /* ================= FAVORITE ================= */
-function toggleFavorite(id) {
+function toggleFav(id) {
     if (favorites.includes(id)) {
         favorites = favorites.filter(v => v !== id);
     } else {
@@ -174,25 +189,42 @@ function toggleFavorite(id) {
     loadVideos();
 }
 
-/* ================= SEARCH (WORKING VERSION) ================= */
+/* ================= SEARCH (SMART FILTER) ================= */
 function searchVideos() {
-    const query = document.getElementById("search").value;
+    const q = document.getElementById("search").value.toLowerCase();
+
+    let results = library.filter(id => id.includes(q));
+
+    if (results.length === 0) results = library;
+
+    render(results);
+}
+
+/* ================= TABS ================= */
+function showTab(tab) {
+    currentTab = tab;
+
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    event.target.classList.add("active");
+
+    loadVideos();
+}
+
+/* ================= LOAD ================= */
+function loadVideos() {
+    if (currentTab === "fav") {
+        render(videos.filter(v => favorites.includes(v.id)).map(v => v.id));
+    } else {
+        render(videos.map(v => v.id));
+    }
+}
+
+/* ================= RENDER ================= */
+function render(list) {
     const grid = document.getElementById("grid");
-
-    if (!query) return;
-
     grid.innerHTML = "";
 
-    // stabila exempel-videos (fungerar alltid)
-    const results = [
-        "dQw4w9WgXcQ",
-        "9bZkp7q19f0",
-        "kJQP7kiw5Fk",
-        "3JZ_D3ELwOQ",
-        "fJ9rUzIMcZQ"
-    ];
-
-    results.forEach(id => {
+    list.forEach(id => {
         const card = document.createElement("div");
         card.className = "card";
 
@@ -200,7 +232,7 @@ function searchVideos() {
             <button class="delete">✖</button>
             <button class="fav">${favorites.includes(id) ? "★" : "☆"}</button>
             <img src="https://img.youtube.com/vi/${id}/hqdefault.jpg">
-            <div>${query}</div>
+            <div>${id}</div>
         `;
 
         card.onclick = () => openVideo(id);
@@ -214,41 +246,7 @@ function searchVideos() {
 
         card.querySelector(".fav").onclick = (e) => {
             e.stopPropagation();
-            toggleFavorite(id);
-        };
-
-        grid.appendChild(card);
-    });
-}
-
-/* ================= LOAD ================= */
-function loadVideos() {
-    const grid = document.getElementById("grid");
-    grid.innerHTML = "";
-
-    videos.forEach((v) => {
-        const card = document.createElement("div");
-        card.className = "card";
-
-        card.innerHTML = `
-            <button class="delete">✖</button>
-            <button class="fav">${favorites.includes(v.id) ? "★" : "☆"}</button>
-            <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
-            <div>${v.id}</div>
-        `;
-
-        card.onclick = () => openVideo(v.id);
-
-        card.querySelector(".delete").onclick = (e) => {
-            e.stopPropagation();
-            videos = videos.filter(x => x.id !== v.id);
-            save();
-            loadVideos();
-        };
-
-        card.querySelector(".fav").onclick = (e) => {
-            e.stopPropagation();
-            toggleFavorite(v.id);
+            toggleFav(id);
         };
 
         grid.appendChild(card);
@@ -264,7 +262,6 @@ function openVideo(id) {
     player.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
 }
 
-/* CLOSE */
 document.getElementById("modal").onclick = () => {
     document.getElementById("modal").style.display = "none";
     document.getElementById("player").src = "";
