@@ -18,19 +18,23 @@ body {
     display: flex;
     gap: 10px;
     justify-content: center;
+    align-items: center;
     flex-wrap: wrap;
 }
 
-input, button {
+input {
     padding: 10px;
     border-radius: 5px;
     border: none;
 }
 
 button {
+    padding: 10px;
     background: red;
+    border: none;
     color: white;
     cursor: pointer;
+    border-radius: 5px;
 }
 
 .grid {
@@ -71,62 +75,58 @@ button {
 <body>
 
 <div class="topbar">
-    <input id="search" placeholder="Sök YouTube">
-    <button onclick="searchVideos()">Sök</button>
+    <input id="videoId" placeholder="YouTube ID (t.ex dQw4w9WgXcQ)">
+    <button onclick="addVideo()">Lägg till</button>
 </div>
 
-<div id="results" class="grid"></div>
+<div class="grid" id="grid"></div>
 
 <div class="modal" id="modal">
-    <iframe id="player" allowfullscreen></iframe>
+    <iframe id="player" allow="autoplay; fullscreen" allowfullscreen></iframe>
 </div>
 
 <script>
 
-/* ================= SIMPLE SEARCH (NO API) ================= */
-async function searchVideos() {
-    const query = document.getElementById("search").value;
-    const results = document.getElementById("results");
+/* ================= DATA ================= */
+let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
-    if (!query) return;
+function saveVideos() {
+    localStorage.setItem("videos", JSON.stringify(videos));
+}
 
-    results.innerHTML = "Söker...";
+/* ================= ADD VIDEO ================= */
+function addVideo() {
+    const input = document.getElementById("videoId");
+    const id = input.value.trim();
 
-    try {
-        // YouTube search redirect trick (works without API)
-        const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    if (!id) return;
 
-        const res = await fetch(url);
-        const text = await res.text();
+    videos.push({ id });
 
-        const videoIds = [...text.matchAll(/"videoId":"(.*?)"/g)].map(m => m[1]);
+    saveVideos();
+    loadVideos();
 
-        results.innerHTML = "";
+    input.value = "";
+}
 
-        const unique = [...new Set(videoIds)].slice(0, 12);
+/* ================= LOAD ================= */
+function loadVideos() {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
 
-        unique.forEach(id => {
-            const div = document.createElement("div");
-            div.className = "card";
+    videos.forEach(v => {
+        const card = document.createElement("div");
+        card.className = "card";
 
-            div.innerHTML = `
-                <img src="https://img.youtube.com/vi/${id}/hqdefault.jpg">
-                <p style="padding:10px">${id}</p>
-            `;
+        card.innerHTML = `
+            <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
+            <div style="padding:10px">${v.id}</div>
+        `;
 
-            div.onclick = () => openVideo(id);
+        card.onclick = () => openVideo(v.id);
 
-            results.appendChild(div);
-        });
-
-        if (!unique.length) {
-            results.innerHTML = "<p>Inga resultat hittades</p>";
-        }
-
-    } catch (err) {
-        console.log(err);
-        results.innerHTML = "<p style='color:red'>Blockerad av nätverk</p>";
-    }
+        grid.appendChild(card);
+    });
 }
 
 /* ================= PLAYER ================= */
@@ -138,10 +138,14 @@ function openVideo(id) {
     player.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
 }
 
+/* CLOSE */
 document.getElementById("modal").onclick = () => {
     document.getElementById("modal").style.display = "none";
     document.getElementById("player").src = "";
 };
+
+/* INIT */
+loadVideos();
 
 </script>
 
