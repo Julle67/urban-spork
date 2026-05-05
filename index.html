@@ -110,21 +110,47 @@ iframe {
     display: flex;
     gap: 10px;
 }
+
+/* HELP MODAL */
+.helpModal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+    text-align: left;
+    padding: 20px;
+}
+
+.helpBox {
+    background: #111;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+}
 </style>
 </head>
 
 <body>
 
+<!-- TOPBAR -->
 <div class="topbar">
     <input id="videoInput" placeholder="YouTube länk eller ID">
     <button onclick="addVideo()">Lägg till</button>
 
     <input id="search" placeholder="Sök i din lista">
     <button onclick="searchLocal()">Sök</button>
+
+    <button onclick="showHelp()">How to use</button>
 </div>
 
+<!-- GRID -->
 <div class="grid" id="grid"></div>
 
+<!-- PLAYER -->
 <div class="player" id="player">
     <iframe id="frame" allow="autoplay; fullscreen"></iframe>
 
@@ -132,6 +158,27 @@ iframe {
         <button onclick="prev()">⬆</button>
         <button onclick="next()">⬇</button>
         <button onclick="closePlayer()">Stäng</button>
+    </div>
+</div>
+
+<!-- HELP POPUP -->
+<div class="helpModal" id="helpModal">
+    <div class="helpBox">
+        <h2>How to use</h2>
+
+        <p>✔ Lägg till video genom att klistra in YouTube-länk eller ID</p>
+        <p>✔ Exempel: https://www.youtube.com/watch?v=XXXX</p>
+        <p>✔ Eller bara: XXXX (11 tecken ID)</p>
+
+        <p>✔ Klicka på video för att spela</p>
+        <p>✔ ★ = favorit</p>
+        <p>✔ ✖ = ta bort video</p>
+
+        <p style="color:gray;margin-top:10px;">
+            Fungerar med embeds via :contentReference[oaicite:0]{index=0}
+        </p>
+
+        <button onclick="closeHelp()" style="margin-top:10px;">Stäng</button>
     </div>
 </div>
 
@@ -174,7 +221,7 @@ function extractYouTubeID(input) {
     }
 }
 
-/* ===== ADD VIDEO ===== */
+/* ===== ADD ===== */
 function addVideo() {
     const input = document.getElementById("videoInput").value;
     const id = extractYouTubeID(input);
@@ -207,6 +254,7 @@ function load(list = videos) {
     grid.innerHTML = "";
 
     list.forEach((v, i) => {
+
         const card = document.createElement("div");
         card.className = "card";
 
@@ -238,9 +286,7 @@ function load(list = videos) {
 /* ===== SEARCH LOCAL ===== */
 function searchLocal() {
     const q = document.getElementById("search").value.toLowerCase();
-
-    const filtered = videos.filter(v => v.id.toLowerCase().includes(q));
-    load(filtered);
+    load(videos.filter(v => v.id.toLowerCase().includes(q)));
 }
 
 /* ===== PLAYER ===== */
@@ -263,6 +309,15 @@ function next() {
 
 function prev() {
     if (currentIndex > 0) open(currentIndex - 1);
+}
+
+/* ===== HELP ===== */
+function showHelp() {
+    document.getElementById("helpModal").style.display = "flex";
+}
+
+function closeHelp() {
+    document.getElementById("helpModal").style.display = "none";
 }
 
 /* INIT */
