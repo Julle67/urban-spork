@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<title>Video Manager</title>
+<title>Pro Video App</title>
 
 <style>
 body {
@@ -12,6 +12,7 @@ body {
     color: white;
 }
 
+/* TOPBAR */
 .topbar {
     padding: 12px;
     background: #111;
@@ -40,24 +41,7 @@ button {
     font-weight: bold;
 }
 
-.tabs {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    padding: 10px;
-}
-
-.tab {
-    padding: 8px 12px;
-    background: #222;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.tab.active {
-    background: red;
-}
-
+/* GRID */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -65,6 +49,7 @@ button {
     padding: 20px;
 }
 
+/* CARD */
 .card {
     background: #181818;
     border-radius: 12px;
@@ -87,6 +72,7 @@ button {
     font-size: 14px;
 }
 
+/* buttons */
 .delete {
     position: absolute;
     top: 6px;
@@ -109,6 +95,7 @@ button {
     border-radius: 6px;
 }
 
+/* MODAL */
 .modal {
     display: none;
     position: fixed;
@@ -129,19 +116,19 @@ button {
 
 <body>
 
+<!-- TOPBAR -->
 <div class="topbar">
     <input id="search" placeholder="Sök video">
     <button onclick="searchVideos()">Sök</button>
-    <button onclick="addRandom()">+ Random video</button>
+
+    <input id="videoId" placeholder="YouTube ID">
+    <button onclick="addVideo()">Lägg till</button>
 </div>
 
-<div class="tabs">
-    <div class="tab active" onclick="showTab('all')">Alla</div>
-    <div class="tab" onclick="showTab('fav')">Favoriter</div>
-</div>
-
+<!-- GRID -->
 <div class="grid" id="grid"></div>
 
+<!-- PLAYER -->
 <div class="modal" id="modal">
     <iframe id="player" allow="autoplay; fullscreen" allowfullscreen></iframe>
 </div>
@@ -151,7 +138,6 @@ button {
 /* ================= DATA ================= */
 let videos = JSON.parse(localStorage.getItem("videos")) || [];
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-let currentTab = "all";
 
 /* ================= SAVE ================= */
 function save() {
@@ -159,20 +145,11 @@ function save() {
     localStorage.setItem("favorites", JSON.stringify(favorites));
 }
 
-/* ================= RANDOM LIBRARY ================= */
-const library = [
-    "dQw4w9WgXcQ",
-    "9bZkp7q19f0",
-    "kJQP7kiw5Fk",
-    "3JZ_D3ELwOQ",
-    "fJ9rUzIMcZQ",
-    "J---aiyznGQ",
-    "eBGIQ7ZuuiU"
-];
+/* ================= ADD VIDEO ================= */
+function addVideo() {
+    const id = document.getElementById("videoId").value.trim();
+    if (!id) return;
 
-/* ================= ADD RANDOM ================= */
-function addRandom() {
-    const id = library[Math.floor(Math.random() * library.length)];
     videos.push({ id });
     save();
     loadVideos();
@@ -189,64 +166,49 @@ function toggleFav(id) {
     loadVideos();
 }
 
-/* ================= SEARCH (SMART FILTER) ================= */
+/* ================= SEARCH (REAL YOUTUBE OPEN) ================= */
 function searchVideos() {
-    const q = document.getElementById("search").value.toLowerCase();
+    const query = document.getElementById("search").value;
+    if (!query) return;
 
-    let results = library.filter(id => id.includes(q));
-
-    if (results.length === 0) results = library;
-
-    render(results);
-}
-
-/* ================= TABS ================= */
-function showTab(tab) {
-    currentTab = tab;
-
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    event.target.classList.add("active");
-
-    loadVideos();
+    // RIKTIG sök på YouTube (inte fake)
+    window.open(
+        `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
+        "_blank"
+    );
 }
 
 /* ================= LOAD ================= */
 function loadVideos() {
-    if (currentTab === "fav") {
-        render(videos.filter(v => favorites.includes(v.id)).map(v => v.id));
-    } else {
-        render(videos.map(v => v.id));
-    }
-}
-
-/* ================= RENDER ================= */
-function render(list) {
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
 
-    list.forEach(id => {
+    videos.forEach((v, index) => {
+
         const card = document.createElement("div");
         card.className = "card";
 
         card.innerHTML = `
             <button class="delete">✖</button>
-            <button class="fav">${favorites.includes(id) ? "★" : "☆"}</button>
-            <img src="https://img.youtube.com/vi/${id}/hqdefault.jpg">
-            <div>${id}</div>
+            <button class="fav">${favorites.includes(v.id) ? "★" : "☆"}</button>
+            <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
+            <div>${v.id}</div>
         `;
 
-        card.onclick = () => openVideo(id);
+        card.onclick = () => openVideo(v.id);
 
+        // delete
         card.querySelector(".delete").onclick = (e) => {
             e.stopPropagation();
-            videos = videos.filter(v => v.id !== id);
+            videos.splice(index, 1);
             save();
             loadVideos();
         };
 
+        // favorite
         card.querySelector(".fav").onclick = (e) => {
             e.stopPropagation();
-            toggleFav(id);
+            toggleFav(v.id);
         };
 
         grid.appendChild(card);
@@ -262,6 +224,7 @@ function openVideo(id) {
     player.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
 }
 
+/* CLOSE */
 document.getElementById("modal").onclick = () => {
     document.getElementById("modal").style.display = "none";
     document.getElementById("player").src = "";
