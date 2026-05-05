@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<title>Youtube Unblocked</title>
+<title>Video App</title>
 
 <style>
 body {
@@ -18,29 +18,25 @@ body {
     display: flex;
     gap: 10px;
     justify-content: center;
-    align-items: center;
     flex-wrap: wrap;
 }
 
-input {
+input, button {
     padding: 10px;
     border-radius: 5px;
     border: none;
 }
 
 button {
-    padding: 10px;
     background: red;
-    border: none;
     color: white;
     cursor: pointer;
-    border-radius: 5px;
 }
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
     padding: 20px;
 }
 
@@ -51,7 +47,7 @@ button {
     cursor: pointer;
 }
 
-.thumbnail {
+.card img {
     width: 100%;
 }
 
@@ -77,122 +73,60 @@ button {
 <div class="topbar">
     <input id="search" placeholder="Sök YouTube">
     <button onclick="searchVideos()">Sök</button>
-
-    <input id="videoId" placeholder="YouTube ID">
-    <button onclick="addVideo()">Lägg till</button>
 </div>
 
-<div id="results" style="padding:20px; display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:10px;"></div>
-
-<div class="grid" id="grid"></div>
+<div id="results" class="grid"></div>
 
 <div class="modal" id="modal">
-    <iframe id="player" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    <iframe id="player" allowfullscreen></iframe>
 </div>
 
 <script>
 
-/* ================= KEY ================= */
-const RAPIDAPI_KEY = "0f6de4aa3fmsh2fe00e58ac5fb26p13edafjsn40b3c3b4b3a3";
-
-/* ================= DATA ================= */
-let videos = JSON.parse(localStorage.getItem("videos")) || [];
-
-function saveVideos() {
-    localStorage.setItem("videos", JSON.stringify(videos));
-}
-
-/* ================= ADD VIDEO ================= */
-function addVideo(id) {
-    const videoId = id || document.getElementById("videoId").value;
-    if (!videoId) return;
-
-    videos.push({ id: videoId });
-
-    saveVideos();
-    loadVideos();
-
-    document.getElementById("videoId").value = "";
-}
-
-/* ================= SEARCH ================= */
+/* ================= SIMPLE SEARCH (NO API) ================= */
 async function searchVideos() {
     const query = document.getElementById("search").value;
-    const resultsDiv = document.getElementById("results");
+    const results = document.getElementById("results");
 
     if (!query) return;
 
-    resultsDiv.innerHTML = "Söker...";
+    results.innerHTML = "Söker...";
 
     try {
-        const res = await fetch(
-            `https://youtube138.p.rapidapi.com/search/?q=${encodeURIComponent(query)}`,
-            {
-                method: "GET",
-                headers: {
-                    "X-RapidAPI-Host": "youtube138.p.rapidapi.com",
-                    "X-RapidAPI-Key": RAPIDAPI_KEY
-                }
-            }
-        );
+        // YouTube search redirect trick (works without API)
+        const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
 
-        const data = await res.json();
+        const res = await fetch(url);
+        const text = await res.text();
 
-        resultsDiv.innerHTML = "";
+        const videoIds = [...text.matchAll(/"videoId":"(.*?)"/g)].map(m => m[1]);
 
-        const items = data.contents || [];
+        results.innerHTML = "";
 
-        if (items.length === 0) {
-            resultsDiv.innerHTML = "<p>Inga resultat</p>";
-            return;
-        }
+        const unique = [...new Set(videoIds)].slice(0, 12);
 
-        items.forEach(item => {
-            const videoId = item?.video?.videoId;
-            const title = item?.video?.title;
-
-            if (!videoId) return;
-
+        unique.forEach(id => {
             const div = document.createElement("div");
-            div.style.background = "#222";
-            div.style.padding = "10px";
-            div.style.borderRadius = "10px";
-            div.style.cursor = "pointer";
+            div.className = "card";
 
             div.innerHTML = `
-                <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" style="width:100%">
-                <p>${title || ""}</p>
+                <img src="https://img.youtube.com/vi/${id}/hqdefault.jpg">
+                <p style="padding:10px">${id}</p>
             `;
 
-            div.onclick = () => addVideo(videoId);
+            div.onclick = () => openVideo(id);
 
-            resultsDiv.appendChild(div);
+            results.appendChild(div);
         });
+
+        if (!unique.length) {
+            results.innerHTML = "<p>Inga resultat hittades</p>";
+        }
 
     } catch (err) {
         console.log(err);
-        resultsDiv.innerHTML = "<p style='color:red'>Fel: API blockerat eller nyckel fel</p>";
+        results.innerHTML = "<p style='color:red'>Blockerad av nätverk</p>";
     }
-}
-
-/* ================= LOAD SAVED ================= */
-function loadVideos() {
-    const grid = document.getElementById("grid");
-    grid.innerHTML = "";
-
-    videos.forEach(v => {
-        const card = document.createElement("div");
-        card.className = "card";
-
-        card.innerHTML = `
-            <img class="thumbnail" src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
-            <div style="padding:10px">${v.id}</div>
-        `;
-
-        card.onclick = () => openVideo(v.id);
-
-        grid.appendChild(card);
-    });
 }
 
 /* ================= PLAYER ================= */
@@ -208,9 +142,6 @@ document.getElementById("modal").onclick = () => {
     document.getElementById("modal").style.display = "none";
     document.getElementById("player").src = "";
 };
-
-/* INIT */
-loadVideos();
 
 </script>
 
