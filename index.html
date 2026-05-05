@@ -1,111 +1,7 @@
-<!DOCTYPE html>
-<html lang="sv">
-<head>
-<meta charset="UTF-8">
-<title>Video App</title>
-
-<style>
-body {
-    margin: 0;
-    font-family: Arial;
-    background: #0f0f0f;
-    color: white;
-}
-
-.topbar {
-    padding: 10px;
-    background: #111;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-input {
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-}
-
-button {
-    padding: 10px;
-    background: red;
-    border: none;
-    color: white;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
-.card {
-    background: #181818;
-    border-radius: 10px;
-    overflow: hidden;
-    cursor: pointer;
-    position: relative;
-}
-
-.thumbnail {
-    width: 100%;
-}
-
-.delete {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.7);
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 5px;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95);
-    justify-content: center;
-    align-items: center;
-}
-
-.modal iframe {
-    width: 80%;
-    height: 80%;
-}
-</style>
-</head>
-
-<body>
-
-<div class="topbar">
-    <input id="search" placeholder="Sök YouTube (t.ex brawl stars)">
-    <button onclick="searchVideos()">Sök</button>
-
-    <input id="videoId" placeholder="YouTube ID">
-    <button onclick="addVideo()">Lägg till</button>
-</div>
-
-<div id="results" style="padding:20px; display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:10px;"></div>
-
-<div class="grid" id="grid"></div>
-
-<div class="modal" id="modal">
-    <iframe id="player" allow="autoplay; fullscreen" allowfullscreen></iframe>
-</div>
-
 <script>
 
 /* ================= DIN KEY ================= */
-const RAPIDAPI_KEY = "DIN_KEY_HÄR";
+const RAPIDAPI_KEY = "0f6de4aa3fmsh2fe00e58ac5fb26p13edafjsn40b3c3b4b3a3";
 
 /* ================= DATA ================= */
 let videos = JSON.parse(localStorage.getItem("videos")) || [];
@@ -132,46 +28,54 @@ function addVideo(id) {
 
 /* ================= SEARCH (RAPIDAPI) ================= */
 async function searchVideos() {
-    const query = search.value;
+    const query = document.getElementById("search").value;
     if (!query) return;
 
-    const res = await fetch("https://youtube138.p.rapidapi.com/search/", {
-        method: "GET",
-        headers: {
-            "x-rapidapi-host": "youtube138.p.rapidapi.com",
-            "x-rapidapi-key": UCJ5v_MCY6GNUBTO8-D3XoAg
-        }
-    });
+    try {
+        const res = await fetch(`https://youtube138.p.rapidapi.com/search/?q=${encodeURIComponent(query)}`, {
+            method: "GET",
+            headers: {
+                "X-RapidAPI-Host": "youtube138.p.rapidapi.com",
+                "X-RapidAPI-Key": RAPIDAPI_KEY
+            }
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    results.innerHTML = "";
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "";
 
-    data.contents?.forEach(item => {
-        const videoId = item.video?.videoId;
-        const title = item.video?.title;
+        data.contents?.forEach(item => {
+            const videoId = item.video?.videoId;
+            const title = item.video?.title;
 
-        if (!videoId) return;
+            if (!videoId) return;
 
-        const div = document.createElement("div");
-        div.style.background = "#222";
-        div.style.padding = "10px";
-        div.style.borderRadius = "10px";
-        div.style.cursor = "pointer";
+            const div = document.createElement("div");
+            div.style.background = "#222";
+            div.style.padding = "10px";
+            div.style.borderRadius = "10px";
+            div.style.cursor = "pointer";
 
-        div.innerHTML = `
-            <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" style="width:100%">
-            <p>${title}</p>
-        `;
+            div.innerHTML = `
+                <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" style="width:100%">
+                <p>${title}</p>
+            `;
 
-        div.onclick = () => addVideo(videoId);
+            div.onclick = () => addVideo(videoId);
 
-        results.appendChild(div);
-    });
+            resultsDiv.appendChild(div);
+        });
+
+    } catch (err) {
+        console.error("API ERROR:", err);
+        alert("Search failed. Could be blocked or invalid API key.");
+    }
 }
 
 /* ================= RENDER ================= */
 function loadVideos() {
+    const grid = document.getElementById("grid");
     grid.innerHTML = "";
 
     videos.forEach(v => {
@@ -193,19 +97,19 @@ function loadVideos() {
 
 /* ================= PLAYER ================= */
 function openVideo(id) {
+    const modal = document.getElementById("modal");
+    const player = document.getElementById("player");
+
     modal.style.display = "flex";
     player.src = `https://www.youtube.com/embed/${id}?autoplay=1&fs=1`;
 }
 
-modal.onclick = () => {
-    modal.style.display = "none";
-    player.src = "";
+document.getElementById("modal").onclick = () => {
+    document.getElementById("modal").style.display = "none";
+    document.getElementById("player").src = "";
 };
 
 /* INIT */
 loadVideos();
 
 </script>
-
-</body>
-</html>
