@@ -6,7 +6,6 @@
 
 <title>Video Hub Pro</title>
 
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f0f0f">
 
@@ -47,6 +46,12 @@ button {
     cursor: pointer;
     background: red;
     color: white;
+}
+
+/* INSTALL KNAPP */
+#installBtn {
+    display: none;
+    background: #00c853;
 }
 
 /* GRID */
@@ -111,6 +116,7 @@ iframe {
 <body>
 
 <div class="topbar">
+
     <input id="videoInput" placeholder="YouTube länk eller ID">
     <button onclick="addVideo()">Lägg till</button>
 
@@ -118,6 +124,10 @@ iframe {
     <button onclick="searchLocal()">Sök</button>
 
     <button onclick="showHelp()">How to use</button>
+
+    <!-- INSTALL KNAPP -->
+    <button onclick="installApp()" id="installBtn">Installera app</button>
+
 </div>
 
 <div class="grid" id="grid"></div>
@@ -142,9 +152,34 @@ iframe {
 
 <script>
 
-/* SERVICE WORKER (PWA) */
+/* SERVICE WORKER */
 if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
+    navigator.serviceWorker.register("/sw.js");
+}
+
+/* INSTALL LOGIC */
+let deferredPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    document.getElementById("installBtn").style.display = "inline-block";
+});
+
+function installApp() {
+    if (!deferredPrompt) {
+        alert("Install är inte tillgängligt just nu. Testa att använda sidan lite först.");
+        return;
+    }
+
+    deferredPrompt.prompt();
+
+    deferredPrompt.userChoice.then((choice) => {
+        console.log("Install result:", choice.outcome);
+        deferredPrompt = null;
+        document.getElementById("installBtn").style.display = "none";
+    });
 }
 
 /* DATA */
@@ -257,20 +292,6 @@ function showHelp() {
 function closeHelp() {
     document.getElementById("helpModal").style.display = "none";
 }
-
-/* CLICK OUTSIDE */
-document.getElementById("player").addEventListener("click", function(e) {
-    if (e.target.id === "player") {
-        closePlayer();
-    }
-});
-
-/* ESC */
-document.addEventListener("keydown", function(e) {
-    if (e.key === "Escape") {
-        closePlayer();
-    }
-});
 
 /* INIT */
 load();
