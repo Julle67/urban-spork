@@ -1,13 +1,7 @@
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open('vh').then(cache => {
-      return cache.addAll(['./']);
-    })
-  );
+self.addEventListener("install", event => {
+    console.log("Service Worker installerad");
 });
 
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
-  );
+self.addEventListener("fetch", event => {
+    // grundläggande pass-through (ingen caching ännu)
 });
