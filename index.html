@@ -1,8 +1,14 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Video Hub Pro</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0f0f">
 
 <style>
 body {
@@ -136,6 +142,11 @@ iframe {
 
 <script>
 
+/* SERVICE WORKER (PWA) */
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+}
+
 /* DATA */
 let videos = JSON.parse(localStorage.getItem("videos")) || [];
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
@@ -247,14 +258,14 @@ function closeHelp() {
     document.getElementById("helpModal").style.display = "none";
 }
 
-/* NEW FIX: CLICK OUTSIDE */
+/* CLICK OUTSIDE */
 document.getElementById("player").addEventListener("click", function(e) {
     if (e.target.id === "player") {
         closePlayer();
     }
 });
 
-/* NEW FIX: ESC KEY */
+/* ESC */
 document.addEventListener("keydown", function(e) {
     if (e.key === "Escape") {
         closePlayer();
