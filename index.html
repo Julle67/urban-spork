@@ -26,6 +26,43 @@ body{
   color:var(--text);
 }
 
+/* 🔥 SPLASH SCREEN */
+#splash{
+  position:fixed;
+  inset:0;
+  background:#0b0b0b;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:9999;
+  animation:fadeOut 1s ease 2.5s forwards;
+}
+
+#splash img{
+  width:120px;
+  height:120px;
+  border-radius:20px;
+  box-shadow:0 0 40px rgba(229,9,20,0.5);
+  animation:pop 1s ease;
+}
+
+#splash h1{
+  margin-top:15px;
+  color:#e50914;
+  font-size:20px;
+  letter-spacing:1px;
+}
+
+@keyframes pop{
+  from{transform:scale(0.6);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+@keyframes fadeOut{
+  to{opacity:0;visibility:hidden}
+}
+
 /* NAV */
 .nav{
   position:sticky;
@@ -40,23 +77,23 @@ body{
   border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
-/* ✅ FIXED LOGO (bild + text) */
+/* LOGO FIX */
 .logo{
   display:flex;
   align-items:center;
   gap:10px;
   font-weight:800;
   color:var(--accent);
-  font-size:18px;
 }
 
 .logo img{
-  width:32px;
-  height:32px;
-  border-radius:8px;
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  object-fit:cover;
+  box-shadow:0 0 12px rgba(229,9,20,0.5);
 }
 
-/* SEARCH */
 .nav input{
   background:#1f1f1f;
   border:none;
@@ -113,15 +150,6 @@ body{
   gap:12px;
   overflow-x:auto;
   padding-bottom:10px;
-}
-
-.row::-webkit-scrollbar{
-  height:6px;
-}
-
-.row::-webkit-scrollbar-thumb{
-  background:#333;
-  border-radius:10px;
 }
 
 /* CARD */
@@ -181,12 +209,17 @@ iframe{
 
 <body>
 
+<!-- 🔥 SPLASH SCREEN -->
+<div id="splash">
+  <img src="icon-512.png" alt="logo">
+  <h1>Youtube Video Storage</h1>
+</div>
+
 <div class="nav">
 
-  <!-- 🔥 LOGO FIX -->
   <div class="logo">
     <img src="icon-512.png" alt="logo">
-    <span>YtStorage</span>
+    <span>YoutubeVideoStorage</span>
   </div>
 
   <input id="search" placeholder="Sök..." oninput="searchLocal()">
@@ -210,12 +243,17 @@ iframe{
 
 <script>
 
-/* PWA - CLEAN INSTALL (Chrome handles it) */
+/* SPLASH REMOVE */
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    document.getElementById("splash").style.display = "none";
+  }, 2500);
+});
+
+/* PWA */
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js")
-      .then(() => console.log("SW OK"))
-      .catch(err => console.log(err));
+    navigator.serviceWorker.register("sw.js");
   });
 }
 
@@ -226,7 +264,7 @@ function save(){
   localStorage.setItem("videos", JSON.stringify(videos));
 }
 
-/* YOUTUBE ID */
+/* YT ID */
 function extractYouTubeID(input){
   try{
     const idRegex=/^[a-zA-Z0-9_-]{11}$/;
