@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Video Hub Pro</title>
+<title>Youtube Video Storage</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
@@ -40,11 +40,23 @@ body{
   border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
+/* ✅ FIXED LOGO (bild + text) */
 .logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
   font-weight:800;
   color:var(--accent);
+  font-size:18px;
 }
 
+.logo img{
+  width:32px;
+  height:32px;
+  border-radius:8px;
+}
+
+/* SEARCH */
 .nav input{
   background:#1f1f1f;
   border:none;
@@ -170,7 +182,13 @@ iframe{
 <body>
 
 <div class="nav">
-  <div class="logo">VideoHub</div>
+
+  <!-- 🔥 LOGO FIX -->
+  <div class="logo">
+    <img src="icon-512.png" alt="logo">
+    <span>YtStorage</span>
+  </div>
+
   <input id="search" placeholder="Sök..." oninput="searchLocal()">
 </div>
 
@@ -269,6 +287,7 @@ function open(id){
   frame.src=`https://www.youtube.com/embed/${id}?autoplay=1`;
 }
 
+/* SEARCH */
 function searchLocal(){
   const q=search.value.toLowerCase();
   allRow.innerHTML="";
