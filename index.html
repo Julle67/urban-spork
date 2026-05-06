@@ -22,39 +22,25 @@ body {
     display: flex;
     gap: 10px;
     justify-content: center;
-    align-items: center;
-    border-bottom: 1px solid #222;
     flex-wrap: wrap;
+    border-bottom: 1px solid #222;
 }
 
 input {
-    padding: 10px 12px;
+    padding: 10px;
     border-radius: 10px;
     border: 1px solid #333;
     background: #1c1c1c;
     color: white;
-    outline: none;
-    min-width: 180px;
-}
-
-input:focus {
-    border-color: red;
 }
 
 button {
-    padding: 10px 14px;
+    padding: 10px;
     border-radius: 10px;
     border: none;
     cursor: pointer;
-    background: #ff0000;
+    background: red;
     color: white;
-    font-weight: bold;
-    transition: 0.2s;
-}
-
-button:hover {
-    transform: scale(1.05);
-    background: #ff2a2a;
 }
 
 /* GRID */
@@ -72,47 +58,21 @@ button:hover {
     overflow: hidden;
     position: relative;
     cursor: pointer;
-    transition: 0.2s;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
 
 .card img {
     width: 100%;
 }
 
-.card div {
-    padding: 10px;
-    font-size: 13px;
-    color: #ccc;
-    word-break: break-word;
-}
-
-/* BUTTONS */
 .delete, .fav {
     position: absolute;
     top: 8px;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
     border: none;
-    cursor: pointer;
+    padding: 5px;
 }
 
-.delete {
-    right: 8px;
-    background: red;
-    color: white;
-}
-
-.fav {
-    left: 8px;
-    background: gold;
-    color: black;
-}
+.delete { right: 8px; background: red; }
+.fav { left: 8px; background: gold; }
 
 /* PLAYER */
 .player {
@@ -126,9 +86,8 @@ button:hover {
 }
 
 iframe {
-    width: min(900px, 95%);
-    height: 70vh;
-    border-radius: 12px;
+    width: 90%;
+    height: 70%;
 }
 
 /* HELP */
@@ -140,51 +99,37 @@ iframe {
     justify-content: center;
     align-items: center;
 }
-
-.helpBox {
-    background: #111;
-    padding: 20px;
-    border-radius: 12px;
-    max-width: 500px;
-}
 </style>
 </head>
 
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
     <input id="videoInput" placeholder="YouTube länk eller ID">
     <button onclick="addVideo()">Lägg till</button>
 
-    <input id="search" placeholder="Sök i din lista">
+    <input id="search" placeholder="Sök">
     <button onclick="searchLocal()">Sök</button>
 
     <button onclick="showHelp()">How to use</button>
 </div>
 
-<!-- GRID -->
 <div class="grid" id="grid"></div>
 
-<!-- PLAYER -->
 <div class="player" id="player">
-    <iframe id="frame" allow="autoplay; fullscreen"></iframe>
+    <iframe id="frame" allow="autoplay"></iframe>
 
-    <div style="margin-top:10px; display:flex; gap:10px;">
+    <div style="margin-top:10px;">
         <button onclick="prev()">⬆</button>
         <button onclick="next()">⬇</button>
         <button onclick="closePlayer()">Stäng</button>
     </div>
 </div>
 
-<!-- HELP -->
 <div class="helpModal" id="helpModal">
-    <div class="helpBox">
+    <div style="background:#111;padding:20px;">
         <h2>How to use</h2>
-        <p>✔ Lägg till YouTube-länk eller ID</p>
-        <p>✔ Klicka video för att spela</p>
-        <p>✔ ★ = favorit</p>
-        <p>✔ ✖ = ta bort</p>
+        <p>Lägg till YouTube länk eller ID</p>
         <button onclick="closeHelp()">Stäng</button>
     </div>
 </div>
@@ -205,9 +150,7 @@ function save() {
 /* VALIDATE */
 function extractYouTubeID(input) {
     try {
-        input = input.trim();
         const idRegex = /^[a-zA-Z0-9_-]{11}$/;
-
         if (idRegex.test(input)) return input;
 
         const url = new URL(input);
@@ -233,24 +176,9 @@ function addVideo() {
     const input = document.getElementById("videoInput").value;
     const id = extractYouTubeID(input);
 
-    if (!id) return alert("❌ Ogiltig video");
-
-    if (videos.some(v => v.id === id)) return alert("Finns redan");
+    if (!id) return alert("Ogiltig video");
 
     videos.push({ id });
-    save();
-    load();
-
-    document.getElementById("videoInput").value = "";
-}
-
-/* FAVORITE */
-function toggleFav(id) {
-    if (favorites.includes(id)) {
-        favorites = favorites.filter(v => v !== id);
-    } else {
-        favorites.push(id);
-    }
     save();
     load();
 }
@@ -261,15 +189,13 @@ function load(list = videos) {
     grid.innerHTML = "";
 
     list.forEach((v, i) => {
-
         const card = document.createElement("div");
         card.className = "card";
 
         card.innerHTML = `
             <button class="delete">✖</button>
-            <button class="fav">${favorites.includes(v.id) ? "★" : "☆"}</button>
+            <button class="fav">★</button>
             <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
-            <div>${v.id}</div>
         `;
 
         card.onclick = () => open(i);
@@ -279,11 +205,6 @@ function load(list = videos) {
             videos.splice(i, 1);
             save();
             load();
-        };
-
-        card.querySelector(".fav").onclick = (e) => {
-            e.stopPropagation();
-            toggleFav(v.id);
         };
 
         grid.appendChild(card);
@@ -325,6 +246,20 @@ function showHelp() {
 function closeHelp() {
     document.getElementById("helpModal").style.display = "none";
 }
+
+/* NEW FIX: CLICK OUTSIDE */
+document.getElementById("player").addEventListener("click", function(e) {
+    if (e.target.id === "player") {
+        closePlayer();
+    }
+});
+
+/* NEW FIX: ESC KEY */
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+        closePlayer();
+    }
+});
 
 /* INIT */
 load();
