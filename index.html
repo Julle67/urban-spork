@@ -26,43 +26,6 @@ body{
   color:var(--text);
 }
 
-/* 🔥 SPLASH SCREEN */
-#splash{
-  position:fixed;
-  inset:0;
-  background:#0b0b0b;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  z-index:9999;
-  animation:fadeOut 1s ease 2.5s forwards;
-}
-
-#splash img{
-  width:120px;
-  height:120px;
-  border-radius:20px;
-  box-shadow:0 0 40px rgba(229,9,20,0.5);
-  animation:pop 1s ease;
-}
-
-#splash h1{
-  margin-top:15px;
-  color:#e50914;
-  font-size:20px;
-  letter-spacing:1px;
-}
-
-@keyframes pop{
-  from{transform:scale(0.6);opacity:0}
-  to{transform:scale(1);opacity:1}
-}
-
-@keyframes fadeOut{
-  to{opacity:0;visibility:hidden}
-}
-
 /* NAV */
 .nav{
   position:sticky;
@@ -77,7 +40,6 @@ body{
   border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
-/* LOGO FIX */
 .logo{
   display:flex;
   align-items:center;
@@ -90,8 +52,6 @@ body{
   width:36px;
   height:36px;
   border-radius:10px;
-  object-fit:cover;
-  box-shadow:0 0 12px rgba(229,9,20,0.5);
 }
 
 .nav input{
@@ -110,7 +70,7 @@ body{
   align-items:flex-end;
   padding:30px;
   background:
-    linear-gradient(to top, #000, transparent),
+    linear-gradient(to top,#000,transparent),
     url('https://images.unsplash.com/photo-1517602302552-471fe67acf66');
   background-size:cover;
 }
@@ -140,9 +100,14 @@ body{
   cursor:pointer;
 }
 
-/* ROW */
+/* SECTIONS */
 .section{
-  padding:20px;
+  padding:10px 20px;
+}
+
+.section h2{
+  font-size:16px;
+  margin:10px 0;
 }
 
 .row{
@@ -150,43 +115,38 @@ body{
   gap:12px;
   overflow-x:auto;
   padding-bottom:10px;
+  scroll-snap-type:x mandatory;
 }
 
 /* CARD */
 .card{
-  min-width:200px;
+  min-width:180px;
   background:var(--card);
   border-radius:12px;
   overflow:hidden;
   position:relative;
   cursor:pointer;
-  transition:.2s;
+  transition:0.25s;
+  scroll-snap-align:start;
 }
 
 .card:hover{
-  transform:scale(1.07);
+  transform:scale(1.1);
+  z-index:2;
 }
 
 .card img{
   width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
 }
 
 .card p{
-  padding:8px;
-  font-size:13px;
+  padding:6px;
+  font-size:12px;
   margin:0;
+  opacity:0.8;
 }
-
-.delete,.fav{
-  position:absolute;
-  top:6px;
-  border:none;
-  padding:4px 6px;
-  cursor:pointer;
-}
-
-.delete{right:6px;background:red;color:white}
-.fav{left:6px;background:gold}
 
 /* PLAYER */
 .player{
@@ -209,17 +169,10 @@ iframe{
 
 <body>
 
-<!-- 🔥 SPLASH SCREEN -->
-<div id="splash">
-  <img src="icon-512.png" alt="logo">
-  <h1>Youtube Video Storage</h1>
-</div>
-
 <div class="nav">
-
   <div class="logo">
     <img src="icon-512.png" alt="logo">
-    <span>YoutubeVideoStorage</span>
+    <span>Youtube Video Storage</span>
   </div>
 
   <input id="search" placeholder="Sök..." oninput="searchLocal()">
@@ -233,7 +186,17 @@ iframe{
 </div>
 
 <div class="section">
-  <h2>🎬 Bibliotek</h2>
+  <h2>🔥 Trending</h2>
+  <div class="row" id="trendingRow"></div>
+</div>
+
+<div class="section">
+  <h2>⭐ Favoriter</h2>
+  <div class="row" id="favRow"></div>
+</div>
+
+<div class="section">
+  <h2>🎬 Alla videos</h2>
   <div class="row" id="allRow"></div>
 </div>
 
@@ -242,13 +205,6 @@ iframe{
 </div>
 
 <script>
-
-/* SPLASH REMOVE */
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    document.getElementById("splash").style.display = "none";
-  }, 2500);
-});
 
 /* PWA */
 if ("serviceWorker" in navigator) {
@@ -264,7 +220,7 @@ function save(){
   localStorage.setItem("videos", JSON.stringify(videos));
 }
 
-/* YT ID */
+/* YOUTUBE ID */
 function extractYouTubeID(input){
   try{
     const idRegex=/^[a-zA-Z0-9_-]{11}$/;
@@ -278,7 +234,7 @@ function extractYouTubeID(input){
 
 /* ADD */
 function addVideo(){
-  const id=extractYouTubeID(videoInput.value);
+  const id = extractYouTubeID(videoInput.value);
   if(!id) return alert("Ogiltig video");
 
   videos.unshift({id,title:id,fav:false});
@@ -286,40 +242,7 @@ function addVideo(){
   render();
 }
 
-/* RENDER */
-function render(){
-  allRow.innerHTML="";
-
-  videos.forEach((v,i)=>{
-    const c=document.createElement("div");
-    c.className="card";
-
-    c.innerHTML=`
-      <button class="delete">✖</button>
-      <button class="fav">${v.fav?"★":"☆"}</button>
-      <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
-      <p>${v.title}</p>
-    `;
-
-    c.onclick=()=>open(v.id);
-
-    c.querySelector(".delete").onclick=e=>{
-      e.stopPropagation();
-      videos.splice(i,1);
-      save(); render();
-    };
-
-    c.querySelector(".fav").onclick=e=>{
-      e.stopPropagation();
-      v.fav=!v.fav;
-      save(); render();
-    };
-
-    allRow.appendChild(c);
-  });
-}
-
-/* PLAYER */
+/* OPEN */
 function open(id){
   player.style.display="flex";
   frame.src=`https://www.youtube.com/embed/${id}?autoplay=1`;
@@ -327,19 +250,46 @@ function open(id){
 
 /* SEARCH */
 function searchLocal(){
-  const q=search.value.toLowerCase();
+  const q = search.value.toLowerCase();
+  render(videos.filter(v=>v.id.toLowerCase().includes(q)));
+}
+
+/* RENDER */
+function render(list = videos){
+
+  trendingRow.innerHTML="";
+  favRow.innerHTML="";
   allRow.innerHTML="";
-  videos
-    .filter(v=>v.id.toLowerCase().includes(q))
-    .forEach(v=>{
-      const c=document.createElement("div");
-      c.className="card";
-      c.innerHTML=`
-        <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
-        <p>${v.title}</p>`;
-      c.onclick=()=>open(v.id);
-      allRow.appendChild(c);
-    });
+
+  list.forEach((v,i)=>{
+
+    const card = document.createElement("div");
+    card.className="card";
+    card.innerHTML=`
+      <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
+      <p>${v.title}</p>
+    `;
+
+    card.onclick=()=>open(v.id);
+
+    // ALL
+    allRow.appendChild(card.cloneNode(true));
+    allRow.lastChild.onclick=()=>open(v.id);
+
+    // FAVORITES
+    if(v.fav){
+      const f = card.cloneNode(true);
+      f.onclick=()=>open(v.id);
+      favRow.appendChild(f);
+    }
+
+    // TRENDING
+    if(i < 10){
+      const t = card.cloneNode(true);
+      t.onclick=()=>open(v.id);
+      trendingRow.appendChild(t);
+    }
+  });
 }
 
 render();
