@@ -22,22 +22,68 @@
 body{
   margin:0;
   font-family:'Inter',sans-serif;
-  background: radial-gradient(circle at top,#1a1a1a,#0b0b0b 60%);
+  background:#0b0b0b;
   color:var(--text);
+}
+
+/* 🔥 CINEMATIC SPLASH */
+#splash{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at center,#1a1a1a,#000);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  animation:fadeOut 0.6s ease 2.2s forwards;
+}
+
+.splash-content{
+  text-align:center;
+  animation:zoomIn 1s ease;
+}
+
+#splash img{
+  width:130px;
+  height:130px;
+  border-radius:20px;
+  box-shadow:0 0 60px rgba(229,9,20,0.6);
+}
+
+#splash h1{
+  margin-top:15px;
+  color:#e50914;
+  font-size:22px;
+}
+
+#splash p{
+  color:#aaa;
+  font-size:12px;
+  margin-top:5px;
+}
+
+@keyframes zoomIn{
+  from{transform:scale(0.7);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+@keyframes fadeOut{
+  to{
+    opacity:0;
+    visibility:hidden;
+  }
 }
 
 /* NAV */
 .nav{
   position:sticky;
   top:0;
-  z-index:10;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:14px 20px;
+  padding:12px 20px;
   background:rgba(0,0,0,0.6);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(255,255,255,0.05);
+  backdrop-filter:blur(10px);
 }
 
 .logo{
@@ -45,118 +91,95 @@ body{
   align-items:center;
   gap:10px;
   font-weight:800;
-  color:var(--accent);
+  color:#e50914;
 }
 
 .logo img{
-  width:36px;
-  height:36px;
-  border-radius:10px;
+  width:34px;
+  height:34px;
+  border-radius:8px;
 }
 
-.nav input{
-  background:#1f1f1f;
-  border:none;
-  padding:8px 12px;
-  border-radius:999px;
-  color:white;
-  outline:none;
-}
-
-/* HERO */
-.hero{
-  height:45vh;
-  display:flex;
-  align-items:flex-end;
-  padding:30px;
-  background:
-    linear-gradient(to top,#000,transparent),
-    url('https://images.unsplash.com/photo-1517602302552-471fe67acf66');
-  background-size:cover;
-}
-
-/* CONTROLS */
+/* INPUT */
 .controls{
   display:flex;
   gap:10px;
-  padding:15px 20px;
+  padding:15px;
 }
 
 .controls input{
   flex:1;
   padding:10px;
-  border-radius:10px;
   border:none;
+  border-radius:8px;
   background:#1f1f1f;
   color:white;
 }
 
 .controls button{
-  background:var(--accent);
+  background:#e50914;
   border:none;
   padding:10px 14px;
-  border-radius:10px;
+  border-radius:8px;
   color:white;
   cursor:pointer;
 }
 
-/* SECTIONS */
-.section{
-  padding:10px 20px;
-}
-
-.section h2{
-  font-size:16px;
-  margin:10px 0;
-}
-
+/* ROW */
 .row{
   display:flex;
   gap:12px;
   overflow-x:auto;
-  padding-bottom:10px;
-  scroll-snap-type:x mandatory;
+  padding:10px 15px;
 }
 
 /* CARD */
 .card{
   min-width:180px;
-  background:var(--card);
-  border-radius:12px;
+  background:#141414;
+  border-radius:10px;
   overflow:hidden;
   position:relative;
   cursor:pointer;
-  transition:0.25s;
-  scroll-snap-align:start;
+  transition:0.2s;
 }
 
 .card:hover{
-  transform:scale(1.1);
-  z-index:2;
+  transform:scale(1.08);
 }
 
 .card img{
   width:100%;
-  aspect-ratio:16/9;
-  object-fit:cover;
 }
 
 .card p{
-  padding:6px;
   font-size:12px;
+  padding:6px;
   margin:0;
-  opacity:0.8;
 }
+
+/* BUTTONS */
+.delete,.fav{
+  position:absolute;
+  top:6px;
+  border:none;
+  padding:4px 6px;
+  cursor:pointer;
+}
+
+.delete{right:6px;background:red;color:white}
+.fav{left:6px;background:gold}
 
 /* PLAYER */
 .player{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.95);
+  background:rgba(0,0,0,0.95);
   justify-content:center;
   align-items:center;
   flex-direction:column;
+  z-index:1000;
 }
 
 iframe{
@@ -169,42 +192,50 @@ iframe{
 
 <body>
 
-<div class="nav">
-  <div class="logo">
-    <img src="icon-512.png" alt="logo">
-    <span>Youtube Video Storage</span>
+<!-- 🔥 SPLASH -->
+<div id="splash">
+  <div class="splash-content">
+    <img src="icon-512.png">
+    <h1>Youtube Video Storage</h1>
+    <p>Loading your videos...</p>
   </div>
-
-  <input id="search" placeholder="Sök..." oninput="searchLocal()">
 </div>
 
-<div class="hero"></div>
+<!-- NAV -->
+<div class="nav">
+  <div class="logo">
+    <img src="icon-512.png">
+    <span>Video Storage</span>
+  </div>
+</div>
 
+<!-- INPUT -->
 <div class="controls">
   <input id="videoInput" placeholder="YouTube länk eller ID">
   <button onclick="addVideo()">Lägg till</button>
 </div>
 
-<div class="section">
-  <h2>🔥 Trending</h2>
-  <div class="row" id="trendingRow"></div>
-</div>
+<!-- LIST -->
+<h3 style="padding:0 15px;">🎬 Videos</h3>
+<div class="row" id="allRow"></div>
 
-<div class="section">
-  <h2>⭐ Favoriter</h2>
-  <div class="row" id="favRow"></div>
-</div>
+<h3 style="padding:0 15px;">⭐ Favoriter</h3>
+<div class="row" id="favRow"></div>
 
-<div class="section">
-  <h2>🎬 Alla videos</h2>
-  <div class="row" id="allRow"></div>
-</div>
-
+<!-- PLAYER -->
 <div class="player" id="player">
   <iframe id="frame" allow="autoplay"></iframe>
 </div>
 
 <script>
+
+/* 🔥 SAFE SPLASH REMOVE */
+window.addEventListener("load", () => {
+  const splash = document.getElementById("splash");
+  setTimeout(() => {
+    if (splash) splash.style.display = "none";
+  }, 2200);
+});
 
 /* PWA */
 if ("serviceWorker" in navigator) {
@@ -217,14 +248,14 @@ if ("serviceWorker" in navigator) {
 let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
 function save(){
-  localStorage.setItem("videos", JSON.stringify(videos));
+  localStorage.setItem("videos",JSON.stringify(videos));
 }
 
-/* YOUTUBE ID */
+/* ID */
 function extractYouTubeID(input){
   try{
-    const idRegex=/^[a-zA-Z0-9_-]{11}$/;
-    if(idRegex.test(input)) return input;
+    const regex=/^[a-zA-Z0-9_-]{11}$/;
+    if(regex.test(input)) return input;
     const url=new URL(input);
     if(url.hostname.includes("youtu.be")) return url.pathname.slice(1);
     if(url.hostname.includes("youtube.com")) return url.searchParams.get("v");
@@ -234,60 +265,78 @@ function extractYouTubeID(input){
 
 /* ADD */
 function addVideo(){
-  const id = extractYouTubeID(videoInput.value);
+  const id=extractYouTubeID(videoInput.value);
   if(!id) return alert("Ogiltig video");
 
-  videos.unshift({id,title:id,fav:false});
+  videos.unshift({id,fav:false});
   save();
   render();
 }
 
 /* OPEN */
-function open(id){
+function openVideo(id){
   player.style.display="flex";
   frame.src=`https://www.youtube.com/embed/${id}?autoplay=1`;
 }
 
-/* SEARCH */
-function searchLocal(){
-  const q = search.value.toLowerCase();
-  render(videos.filter(v=>v.id.toLowerCase().includes(q)));
+/* CLICK OUTSIDE TO CLOSE */
+document.getElementById("player").addEventListener("click",(e)=>{
+  if(e.target.id==="player"){
+    player.style.display="none";
+    frame.src="";
+  }
+});
+
+/* FAVORITE */
+function toggleFav(i){
+  videos[i].fav=!videos[i].fav;
+  save();
+  render();
+}
+
+/* DELETE */
+function removeVideo(i){
+  videos.splice(i,1);
+  save();
+  render();
 }
 
 /* RENDER */
-function render(list = videos){
+function render(){
 
-  trendingRow.innerHTML="";
-  favRow.innerHTML="";
   allRow.innerHTML="";
+  favRow.innerHTML="";
 
-  list.forEach((v,i)=>{
+  videos.forEach((v,i)=>{
 
-    const card = document.createElement("div");
+    const card=document.createElement("div");
     card.className="card";
+
     card.innerHTML=`
+      <button class="delete">✖</button>
+      <button class="fav">${v.fav?"★":"☆"}</button>
       <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
-      <p>${v.title}</p>
+      <p>${v.id}</p>
     `;
 
-    card.onclick=()=>open(v.id);
+    card.onclick=()=>openVideo(v.id);
 
-    // ALL
-    allRow.appendChild(card.cloneNode(true));
-    allRow.lastChild.onclick=()=>open(v.id);
+    card.querySelector(".delete").onclick=(e)=>{
+      e.stopPropagation();
+      removeVideo(i);
+    };
 
-    // FAVORITES
+    card.querySelector(".fav").onclick=(e)=>{
+      e.stopPropagation();
+      toggleFav(i);
+    };
+
+    allRow.appendChild(card);
+
     if(v.fav){
-      const f = card.cloneNode(true);
-      f.onclick=()=>open(v.id);
+      const f=card.cloneNode(true);
+      f.onclick=()=>openVideo(v.id);
       favRow.appendChild(f);
-    }
-
-    // TRENDING
-    if(i < 10){
-      const t = card.cloneNode(true);
-      t.onclick=()=>open(v.id);
-      trendingRow.appendChild(t);
     }
   });
 }
