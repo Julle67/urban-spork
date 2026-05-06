@@ -4,8 +4,9 @@ self.addEventListener("install", event => {
 
 self.addEventListener("activate", event => {
     event.waitUntil(self.clients.claim());
+    console.log("SW activated and claiming clients");
 });
 
 self.addEventListener("fetch", event => {
-    // pass-through
+    event.respondWith(fetch(event.request));
 });
