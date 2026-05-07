@@ -561,17 +561,16 @@ function openVideo(id){
 
   player.style.display="flex";
 
-  frame.src=
-  `https://www.youtube.com/embed/${id}?autoplay=1`;
+  frame.src =
+  `https://www.youtube.com/embed/${id}?autoplay=1&playsinline=1&fs=1`;
 
-  lastWatched=id;
+  lastWatched = id;
 
-  watchProgress[id]=10;
+  watchProgress[id] = 10;
 
   save();
 
   render();
-
 }
 
 /* CLOSE */
