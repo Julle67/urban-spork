@@ -299,6 +299,21 @@ body{
   border-radius:16px;
 }
 
+/* 🔥 FULLSCREEN KNAPP (ENDAST TILLAGD) */
+.fs-btn{
+  position:absolute;
+  bottom:20px;
+  right:20px;
+  z-index:1000;
+  padding:10px 14px;
+  border:none;
+  border-radius:10px;
+  background:#e50914;
+  color:white;
+  cursor:pointer;
+  font-weight:700;
+}
+
 /* MOBILE */
 
 @media(max-width:700px){
@@ -412,7 +427,12 @@ body{
 <!-- PLAYER -->
 
 <div class="player" id="player">
-  <iframe id="frame" allow="autoplay"></iframe>
+
+  <iframe id="frame" allow="autoplay" allowfullscreen></iframe>
+
+  <!-- 🔥 FULLSCREEN KNAPP (ENDAST TILLAGD) -->
+  <button class="fs-btn" onclick="toggleFullscreen(event)">⛶ Fullscreen</button>
+
 </div>
 
 <script>
@@ -761,6 +781,20 @@ document.addEventListener("keydown",(e)=>{
   }
 
 });
+
+/* 🔥 FULLSCREEN FUNCTION (ENDAST TILLAGD) */
+function toggleFullscreen(e){
+
+  e.stopPropagation();
+
+  const el = player;
+
+  if(!document.fullscreenElement){
+    el.requestFullscreen();
+  }else{
+    document.exitFullscreen();
+  }
+}
 
 render();
 
