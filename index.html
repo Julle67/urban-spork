@@ -3,13 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 <title>Youtube Video Storage</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
+
 <meta name="theme-color" content="#0b0b0b">
 
+<link rel="apple-touch-icon" href="icon-512.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
 <style>
+
 :root{
   --bg:#0b0b0b;
   --card:#141414;
@@ -17,16 +23,20 @@
   --text:#fff;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
 body{
   margin:0;
-  font-family:'Inter',sans-serif;
-  background:#0b0b0b;
+  background:var(--bg);
   color:var(--text);
+  font-family:'Inter',sans-serif;
+  overflow-x:hidden;
 }
 
-/* 🔥 CINEMATIC SPLASH */
+/* SPLASH */
+
 #splash{
   position:fixed;
   inset:0;
@@ -35,7 +45,7 @@ body{
   justify-content:center;
   align-items:center;
   z-index:9999;
-  animation:fadeOut 0.6s ease 2.2s forwards;
+  animation:fadeOut .7s ease 2.3s forwards;
 }
 
 .splash-content{
@@ -43,28 +53,33 @@ body{
   animation:zoomIn 1s ease;
 }
 
-#splash img{
+.splash-content img{
   width:130px;
   height:130px;
-  border-radius:20px;
-  box-shadow:0 0 60px rgba(229,9,20,0.6);
+  border-radius:26px;
+  box-shadow:0 0 60px rgba(229,9,20,.5);
 }
 
-#splash h1{
-  margin-top:15px;
+.splash-content h1{
   color:#e50914;
-  font-size:22px;
+  margin-top:16px;
+  font-size:24px;
 }
 
-#splash p{
+.splash-content p{
   color:#aaa;
-  font-size:12px;
-  margin-top:5px;
+  font-size:13px;
 }
 
 @keyframes zoomIn{
-  from{transform:scale(0.7);opacity:0}
-  to{transform:scale(1);opacity:1}
+  from{
+    transform:scale(.7);
+    opacity:0;
+  }
+  to{
+    transform:scale(1);
+    opacity:1;
+  }
 }
 
 @keyframes fadeOut{
@@ -75,15 +90,17 @@ body{
 }
 
 /* NAV */
+
 .nav{
   position:sticky;
   top:0;
+  z-index:100;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:12px 20px;
-  background:rgba(0,0,0,0.6);
-  backdrop-filter:blur(10px);
+  padding:14px 18px;
+  background:rgba(0,0,0,.65);
+  backdrop-filter:blur(12px);
 }
 
 .logo{
@@ -95,104 +112,212 @@ body{
 }
 
 .logo img{
-  width:34px;
-  height:34px;
-  border-radius:8px;
+  width:38px;
+  height:38px;
+  border-radius:10px;
 }
 
-/* INPUT */
+.search{
+  width:180px;
+  padding:10px;
+  border:none;
+  border-radius:999px;
+  background:#1f1f1f;
+  color:white;
+  outline:none;
+}
+
+/* HERO */
+
+.hero{
+  height:45vh;
+  position:relative;
+  display:flex;
+  align-items:flex-end;
+  padding:30px;
+  background:
+  linear-gradient(to top,#000,transparent),
+  url('https://images.unsplash.com/photo-1517602302552-471fe67acf66');
+  background-size:cover;
+  background-position:center;
+}
+
+.hero-content h1{
+  font-size:40px;
+  margin:0;
+}
+
+.hero-content p{
+  color:#ccc;
+  max-width:500px;
+}
+
+/* CONTROLS */
+
 .controls{
   display:flex;
   gap:10px;
-  padding:15px;
+  padding:18px;
 }
 
 .controls input{
   flex:1;
-  padding:10px;
+  padding:12px;
   border:none;
-  border-radius:8px;
+  border-radius:12px;
   background:#1f1f1f;
   color:white;
+  font-size:14px;
 }
 
 .controls button{
-  background:#e50914;
-  border:none;
-  padding:10px 14px;
-  border-radius:8px;
+  background:var(--accent);
   color:white;
+  border:none;
+  border-radius:12px;
+  padding:12px 18px;
   cursor:pointer;
+  font-weight:700;
+}
+
+/* SECTIONS */
+
+.section{
+  padding:10px 18px;
+}
+
+.section h2{
+  margin-bottom:10px;
 }
 
 /* ROW */
+
 .row{
   display:flex;
-  gap:12px;
+  gap:14px;
   overflow-x:auto;
-  padding:10px 15px;
+  scroll-behavior:smooth;
+  padding-bottom:12px;
+}
+
+.row::-webkit-scrollbar{
+  height:7px;
+}
+
+.row::-webkit-scrollbar-thumb{
+  background:#333;
+  border-radius:20px;
 }
 
 /* CARD */
+
 .card{
-  min-width:180px;
-  background:#141414;
-  border-radius:10px;
+  min-width:220px;
+  background:var(--card);
+  border-radius:14px;
   overflow:hidden;
   position:relative;
   cursor:pointer;
-  transition:0.2s;
+  transition:.25s;
+  flex-shrink:0;
 }
 
 .card:hover{
   transform:scale(1.08);
+  z-index:3;
 }
 
 .card img{
   width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
 }
 
 .card p{
-  font-size:12px;
-  padding:6px;
+  padding:8px;
   margin:0;
+  font-size:13px;
+  color:#ddd;
 }
 
 /* BUTTONS */
-.delete,.fav{
+
+.delete,
+.fav{
   position:absolute;
-  top:6px;
+  top:8px;
   border:none;
-  padding:4px 6px;
+  padding:5px 8px;
   cursor:pointer;
+  border-radius:8px;
+  z-index:5;
 }
 
-.delete{right:6px;background:red;color:white}
-.fav{left:6px;background:gold}
+.delete{
+  right:8px;
+  background:red;
+  color:white;
+}
+
+.fav{
+  left:8px;
+  background:gold;
+}
 
 /* PLAYER */
+
 .player{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.95);
+  background:rgba(0,0,0,.96);
   justify-content:center;
   align-items:center;
-  flex-direction:column;
-  z-index:1000;
+  z-index:999;
 }
 
-iframe{
+.player iframe{
   width:90%;
-  height:65%;
-  border-radius:12px;
+  height:70%;
+  border:none;
+  border-radius:16px;
 }
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+  .hero{
+    height:35vh;
+  }
+
+  .hero-content h1{
+    font-size:28px;
+  }
+
+  .card{
+    min-width:170px;
+  }
+
+  .player iframe{
+    width:100%;
+    height:40%;
+    border-radius:0;
+  }
+
+  .search{
+    width:120px;
+  }
+
+}
+
 </style>
 </head>
 
 <body>
 
-<!-- 🔥 SPLASH -->
+<!-- SPLASH -->
+
 <div id="splash">
   <div class="splash-content">
     <img src="icon-512.png">
@@ -202,144 +327,374 @@ iframe{
 </div>
 
 <!-- NAV -->
+
 <div class="nav">
+
   <div class="logo">
     <img src="icon-512.png">
-    <span>Video Storage</span>
+    <span>Youtube Video Storage</span>
+  </div>
+
+  <input
+    class="search"
+    id="searchInput"
+    placeholder="Sök..."
+    oninput="searchVideos()"
+  >
+
+</div>
+
+<!-- HERO -->
+
+<div class="hero">
+  <div class="hero-content">
+    <h1>Your Video Library</h1>
+    <p>
+      Save, organize and watch your favorite YouTube videos
+      in one clean streaming-style app.
+    </p>
   </div>
 </div>
 
-<!-- INPUT -->
+<!-- CONTROLS -->
+
 <div class="controls">
-  <input id="videoInput" placeholder="YouTube länk eller ID">
-  <button onclick="addVideo()">Lägg till</button>
+
+  <input
+    id="videoInput"
+    placeholder="YouTube länk eller video-ID"
+  >
+
+  <button onclick="addVideo()">
+    Lägg till
+  </button>
+
 </div>
 
-<!-- LIST -->
-<h3 style="padding:0 15px;">🎬 Videos</h3>
-<div class="row" id="allRow"></div>
+<!-- CONTINUE -->
 
-<h3 style="padding:0 15px;">⭐ Favoriter</h3>
-<div class="row" id="favRow"></div>
+<div class="section">
+  <h2>⏯ Continue Watching</h2>
+  <div class="row" id="continueRow"></div>
+</div>
+
+<!-- FAVORITES -->
+
+<div class="section">
+  <h2>⭐ Favoriter</h2>
+  <div class="row" id="favRow"></div>
+</div>
+
+<!-- ALL -->
+
+<div class="section">
+  <h2>🎬 Alla Videos</h2>
+  <div class="row" id="allRow"></div>
+</div>
 
 <!-- PLAYER -->
+
 <div class="player" id="player">
   <iframe id="frame" allow="autoplay"></iframe>
 </div>
 
 <script>
 
-/* 🔥 SAFE SPLASH REMOVE */
-window.addEventListener("load", () => {
-  const splash = document.getElementById("splash");
-  setTimeout(() => {
-    if (splash) splash.style.display = "none";
-  }, 2200);
+/* REMOVE SPLASH */
+
+window.addEventListener("load",()=>{
+
+  setTimeout(()=>{
+
+    const splash=document.getElementById("splash");
+
+    if(splash){
+      splash.style.display="none";
+    }
+
+  },3000);
+
 });
 
 /* PWA */
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
+
+if("serviceWorker" in navigator){
+
+  window.addEventListener("load",()=>{
+
     navigator.serviceWorker.register("sw.js");
+
   });
+
 }
 
-/* DATA */
-let videos = JSON.parse(localStorage.getItem("videos")) || [];
+/* STORAGE */
+
+let videos=
+JSON.parse(localStorage.getItem("videos")) || [];
+
+let lastWatched=
+localStorage.getItem("lastWatched") || "";
+
+/* SAVE */
 
 function save(){
-  localStorage.setItem("videos",JSON.stringify(videos));
+
+  localStorage.setItem(
+    "videos",
+    JSON.stringify(videos)
+  );
+
+  localStorage.setItem(
+    "lastWatched",
+    lastWatched
+  );
+
 }
 
-/* ID */
+/* YOUTUBE ID */
+
 function extractYouTubeID(input){
+
   try{
+
     const regex=/^[a-zA-Z0-9_-]{11}$/;
-    if(regex.test(input)) return input;
+
+    if(regex.test(input)){
+      return input;
+    }
+
     const url=new URL(input);
-    if(url.hostname.includes("youtu.be")) return url.pathname.slice(1);
-    if(url.hostname.includes("youtube.com")) return url.searchParams.get("v");
+
+    if(url.hostname.includes("youtu.be")){
+      return url.pathname.slice(1);
+    }
+
+    if(url.hostname.includes("youtube.com")){
+      return url.searchParams.get("v");
+    }
+
   }catch{}
+
   return null;
+
 }
 
-/* ADD */
+/* ADD VIDEO */
+
 function addVideo(){
-  const id=extractYouTubeID(videoInput.value);
-  if(!id) return alert("Ogiltig video");
 
-  videos.unshift({id,fav:false});
-  save();
-  render();
-}
+  const id=
+  extractYouTubeID(videoInput.value);
 
-/* OPEN */
-function openVideo(id){
-  player.style.display="flex";
-  frame.src=`https://www.youtube.com/embed/${id}?autoplay=1`;
-}
-
-/* CLICK OUTSIDE TO CLOSE */
-document.getElementById("player").addEventListener("click",(e)=>{
-  if(e.target.id==="player"){
-    player.style.display="none";
-    frame.src="";
+  if(!id){
+    return alert("Ogiltig video");
   }
+
+  videos.unshift({
+    id,
+    fav:false
+  });
+
+  videoInput.value="";
+
+  save();
+
+  render();
+
+}
+
+/* OPEN VIDEO */
+
+function openVideo(id){
+
+  player.style.display="flex";
+
+  frame.src=
+  `https://www.youtube.com/embed/${id}?autoplay=1`;
+
+  lastWatched=id;
+
+  save();
+
+  render();
+
+}
+
+/* CLOSE PLAYER */
+
+function closePlayer(){
+
+  player.style.display="none";
+
+  frame.src="";
+
+}
+
+/* CLICK OUTSIDE */
+
+player.addEventListener("click",(e)=>{
+
+  if(e.target.id==="player"){
+    closePlayer();
+  }
+
+});
+
+/* ESC CLOSE */
+
+document.addEventListener("keydown",(e)=>{
+
+  if(e.key==="Escape"){
+    closePlayer();
+  }
+
 });
 
 /* FAVORITE */
+
 function toggleFav(i){
+
   videos[i].fav=!videos[i].fav;
+
   save();
+
   render();
+
 }
 
 /* DELETE */
+
 function removeVideo(i){
-  videos.splice(i,1);
-  save();
-  render();
+
+  if(confirm("Ta bort video?")){
+
+    videos.splice(i,1);
+
+    save();
+
+    render();
+
+  }
+
+}
+
+/* SEARCH */
+
+function searchVideos(){
+
+  const q=
+  searchInput.value.toLowerCase();
+
+  const filtered=
+  videos.filter(v=>
+    v.id.toLowerCase().includes(q)
+  );
+
+  render(filtered);
+
+}
+
+/* CARD */
+
+function createCard(v,i){
+
+  const card=
+  document.createElement("div");
+
+  card.className="card";
+
+  card.innerHTML=`
+
+    <button class="delete">✖</button>
+
+    <button class="fav">
+      ${v.fav ? "★" : "☆"}
+    </button>
+
+    <img
+      src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg"
+    >
+
+    <p>${v.id}</p>
+
+  `;
+
+  card.onclick=()=>openVideo(v.id);
+
+  /* DELETE */
+
+  card.querySelector(".delete")
+  .onclick=(e)=>{
+
+    e.stopPropagation();
+
+    removeVideo(i);
+
+  };
+
+  /* FAVORITE */
+
+  card.querySelector(".fav")
+  .onclick=(e)=>{
+
+    e.stopPropagation();
+
+    toggleFav(i);
+
+  };
+
+  return card;
+
 }
 
 /* RENDER */
-function render(){
+
+function render(list=videos){
 
   allRow.innerHTML="";
   favRow.innerHTML="";
+  continueRow.innerHTML="";
 
-  videos.forEach((v,i)=>{
+  list.forEach((v,i)=>{
 
-    const card=document.createElement("div");
-    card.className="card";
-
-    card.innerHTML=`
-      <button class="delete">✖</button>
-      <button class="fav">${v.fav?"★":"☆"}</button>
-      <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
-      <p>${v.id}</p>
-    `;
-
-    card.onclick=()=>openVideo(v.id);
-
-    card.querySelector(".delete").onclick=(e)=>{
-      e.stopPropagation();
-      removeVideo(i);
-    };
-
-    card.querySelector(".fav").onclick=(e)=>{
-      e.stopPropagation();
-      toggleFav(i);
-    };
+    const card=createCard(v,i);
 
     allRow.appendChild(card);
 
     if(v.fav){
-      const f=card.cloneNode(true);
-      f.onclick=()=>openVideo(v.id);
-      favRow.appendChild(f);
+
+      favRow.appendChild(
+        createCard(v,i)
+      );
+
     }
+
+    if(lastWatched===v.id){
+
+      continueRow.appendChild(
+        createCard(v,i)
+      );
+
+    }
+
   });
+
 }
+
+/* SEARCH SHORTCUT */
+
+document.addEventListener("keydown",(e)=>{
+
+  if(e.key==="/"){
+
+    e.preventDefault();
+
+    searchInput.focus();
+
+  }
+
+});
 
 render();
 
