@@ -7,7 +7,9 @@
 <title>Youtube Video Storage</title>
 
 <link rel="manifest" href="manifest.json">
+
 <meta name="theme-color" content="#0b0b0b">
+
 <link rel="apple-touch-icon" href="icon-512.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -21,7 +23,9 @@
   --text:#fff;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
 body{
   margin:0;
@@ -68,12 +72,21 @@ body{
 }
 
 @keyframes zoomIn{
-  from{transform:scale(.7);opacity:0;}
-  to{transform:scale(1);opacity:1;}
+  from{
+    transform:scale(.7);
+    opacity:0;
+  }
+  to{
+    transform:scale(1);
+    opacity:1;
+  }
 }
 
 @keyframes fadeOut{
-  to{opacity:0;visibility:hidden;}
+  to{
+    opacity:0;
+    visibility:hidden;
+  }
 }
 
 /* NAV */
@@ -122,8 +135,8 @@ body{
   align-items:flex-end;
   padding:30px;
   background:
-    linear-gradient(to top,#000,transparent),
-    url('icon-512.png');
+  linear-gradient(to top,#000,transparent),
+  url('https://images.unsplash.com/photo-1517602302552-471fe67acf66');
   background-size:cover;
   background-position:center;
 }
@@ -186,8 +199,14 @@ body{
   scroll-behavior:smooth;
 }
 
-.row::-webkit-scrollbar{height:7px;}
-.row::-webkit-scrollbar-thumb{background:#333;border-radius:20px;}
+.row::-webkit-scrollbar{
+  height:7px;
+}
+
+.row::-webkit-scrollbar-thumb{
+  background:#333;
+  border-radius:20px;
+}
 
 /* CARD */
 
@@ -198,7 +217,9 @@ body{
   overflow:hidden;
   position:relative;
   cursor:pointer;
-  transition:.25s;
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease;
   flex-shrink:0;
 }
 
@@ -237,7 +258,8 @@ body{
 
 /* BUTTONS */
 
-.delete,.fav{
+.delete,
+.fav{
   position:absolute;
   top:8px;
   border:none;
@@ -247,10 +269,18 @@ body{
   z-index:5;
 }
 
-.delete{right:8px;background:red;color:white;}
-.fav{left:8px;background:gold;}
+.delete{
+  right:8px;
+  background:red;
+  color:white;
+}
 
-/* PLAYER (FULLSCREEN FIX) */
+.fav{
+  left:8px;
+  background:gold;
+}
+
+/* PLAYER */
 
 .player{
   display:none;
@@ -263,18 +293,38 @@ body{
 }
 
 .player iframe{
-  width:100%;
-  height:100%;
+  width:90%;
+  height:70%;
   border:none;
+  border-radius:16px;
 }
 
 /* MOBILE */
 
 @media(max-width:700px){
-  .hero{height:35vh;}
-  .hero-content h1{font-size:28px;}
-  .card{min-width:170px;}
-  .search{width:120px;}
+
+  .hero{
+    height:35vh;
+  }
+
+  .hero-content h1{
+    font-size:28px;
+  }
+
+  .card{
+    min-width:170px;
+  }
+
+  .player iframe{
+    width:100%;
+    height:40%;
+    border-radius:0;
+  }
+
+  .search{
+    width:120px;
+  }
+
 }
 
 </style>
@@ -283,48 +333,76 @@ body{
 <body>
 
 <!-- SPLASH -->
+
 <div id="splash">
   <div class="splash-content">
     <img src="icon-512.png">
     <h1>Youtube Video Storage</h1>
-    <p>Loading...</p>
+    <p>Loading your videos...</p>
   </div>
 </div>
 
 <!-- NAV -->
+
 <div class="nav">
+
   <div class="logo">
     <img src="icon-512.png">
     <span>Youtube Video Storage</span>
   </div>
 
-  <input id="searchInput" class="search" placeholder="Sök..." oninput="searchVideos()">
+  <input
+    class="search"
+    id="searchInput"
+    placeholder="Sök..."
+    oninput="searchVideos()"
+  >
+
 </div>
 
 <!-- HERO -->
+
 <div class="hero">
   <div class="hero-content">
     <h1>Your Video Library</h1>
-    <p>Save and watch YouTube videos like a streaming app.</p>
+
+    <p>
+      Save, organize and watch your favorite YouTube videos
+      in one modern streaming-style app.
+    </p>
   </div>
 </div>
 
 <!-- CONTROLS -->
+
 <div class="controls">
-  <input id="videoInput" placeholder="YouTube länk eller ID">
-  <button onclick="addVideo()">Lägg till</button>
+
+  <input
+    id="videoInput"
+    placeholder="YouTube länk eller video-ID"
+  >
+
+  <button onclick="addVideo()">
+    Lägg till
+  </button>
+
 </div>
 
-<!-- SECTIONS -->
+<!-- CONTINUE -->
+
 <div class="section">
   <h2>⏯ Continue Watching</h2>
   <div class="row" id="continueRow"></div>
 </div>
 
+<!-- FAVORITES -->
+
 <div class="section">
   <h2>⭐ Favoriter</h2>
   <div class="row" id="favRow"></div>
 </div>
+
+<!-- ALL -->
 
 <div class="section">
   <h2>🎬 Alla Videos</h2>
@@ -332,160 +410,358 @@ body{
 </div>
 
 <!-- PLAYER -->
+
 <div class="player" id="player">
-  <iframe id="frame" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+  <iframe id="frame" allow="autoplay"></iframe>
 </div>
 
 <script>
 
+/* SPLASH */
+
 window.addEventListener("load",()=>{
+
   setTimeout(()=>{
-    document.getElementById("splash").style.display="none";
-  },2500);
+
+    const splash=document.getElementById("splash");
+
+    if(splash){
+      splash.style.display="none";
+    }
+
+  },3000);
+
 });
 
-/* DATA */
-let videos = JSON.parse(localStorage.getItem("videos")) || [];
-let lastWatched = localStorage.getItem("lastWatched") || "";
-let watchProgress = JSON.parse(localStorage.getItem("watchProgress")) || {};
+/* PWA */
+
+if("serviceWorker" in navigator){
+
+  window.addEventListener("load",()=>{
+
+    navigator.serviceWorker.register("sw.js");
+
+  });
+
+}
+
+/* STORAGE */
+
+let videos=
+JSON.parse(localStorage.getItem("videos")) || [];
+
+let lastWatched=
+localStorage.getItem("lastWatched") || "";
+
+let watchProgress=
+JSON.parse(localStorage.getItem("watchProgress")) || {};
+
+/* SAVE */
 
 function save(){
-  localStorage.setItem("videos",JSON.stringify(videos));
-  localStorage.setItem("lastWatched",lastWatched);
-  localStorage.setItem("watchProgress",JSON.stringify(watchProgress));
+
+  localStorage.setItem(
+    "videos",
+    JSON.stringify(videos)
+  );
+
+  localStorage.setItem(
+    "lastWatched",
+    lastWatched
+  );
+
+  localStorage.setItem(
+    "watchProgress",
+    JSON.stringify(watchProgress)
+  );
+
 }
 
 /* YOUTUBE ID */
+
 function extractYouTubeID(input){
+
   try{
+
     const regex=/^[a-zA-Z0-9_-]{11}$/;
-    if(regex.test(input)) return input;
+
+    if(regex.test(input)){
+      return input;
+    }
 
     const url=new URL(input);
-    if(url.hostname.includes("youtu.be")) return url.pathname.slice(1);
-    if(url.hostname.includes("youtube.com")) return url.searchParams.get("v");
+
+    if(url.hostname.includes("youtu.be")){
+      return url.pathname.slice(1);
+    }
+
+    if(url.hostname.includes("youtube.com")){
+      return url.searchParams.get("v");
+    }
+
   }catch{}
+
   return null;
+
 }
 
-/* TITLE */
+/* FETCH TITLE */
+
 async function fetchTitle(id){
+
   try{
-    const res=await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`);
+
+    const res=await fetch(
+      `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
+    );
+
     const data=await res.json();
+
     return data.title || "YouTube Video";
+
   }catch{
+
     return "YouTube Video";
+
   }
+
 }
 
-/* ADD */
+/* ADD VIDEO */
+
 async function addVideo(){
-  const id = extractYouTubeID(videoInput.value);
-  if(!id) return alert("Ogiltig video");
 
-  const title = await fetchTitle(id);
+  const id=
+  extractYouTubeID(videoInput.value);
 
-  videos.unshift({id,title,fav:false});
+  if(!id){
+    return alert("Ogiltig video");
+  }
+
+  const title=
+  await fetchTitle(id);
+
+  videos.unshift({
+    id,
+    title,
+    fav:false
+  });
 
   videoInput.value="";
+
   save();
+
   render();
+
 }
 
-/* OPEN VIDEO (FULLSCREEN READY) */
+/* OPEN VIDEO */
+
 function openVideo(id){
+
   player.style.display="flex";
-  frame.src=`https://www.youtube.com/embed/${id}?autoplay=1&playsinline=1&fs=1`;
+
+  frame.src=
+  `https://www.youtube.com/embed/${id}?autoplay=1`;
 
   lastWatched=id;
+
   watchProgress[id]=10;
 
   save();
+
   render();
+
 }
 
 /* CLOSE */
+
 function closePlayer(){
+
   player.style.display="none";
+
   frame.src="";
+
 }
 
+/* CLICK OUTSIDE */
+
 player.addEventListener("click",(e)=>{
-  if(e.target.id==="player") closePlayer();
+
+  if(e.target.id==="player"){
+    closePlayer();
+  }
+
 });
 
+/* ESC CLOSE */
+
 document.addEventListener("keydown",(e)=>{
-  if(e.key==="Escape") closePlayer();
+
+  if(e.key==="Escape"){
+    closePlayer();
+  }
+
 });
 
 /* FAVORITE */
+
 function toggleFav(i){
+
   videos[i].fav=!videos[i].fav;
+
   save();
+
   render();
+
 }
 
 /* DELETE */
+
 function removeVideo(i){
-  videos.splice(i,1);
-  save();
-  render();
+
+  if(confirm("Ta bort video?")){
+
+    videos.splice(i,1);
+
+    save();
+
+    render();
+
+  }
+
 }
 
 /* SEARCH */
+
 function searchVideos(){
-  const q = searchInput.value.toLowerCase();
-  render(videos.filter(v=>v.title.toLowerCase().includes(q)));
+
+  const q=
+  searchInput.value.toLowerCase();
+
+  const filtered=
+  videos.filter(v=>
+
+    (v.title || "")
+    .toLowerCase()
+    .includes(q)
+
+  );
+
+  render(filtered);
+
 }
 
-/* CARD */
+/* CREATE CARD */
+
 function createCard(v,i){
-  const card=document.createElement("div");
+
+  const card=
+  document.createElement("div");
+
   card.className="card";
 
   card.innerHTML=`
+
     <button class="delete">✖</button>
-    <button class="fav">${v.fav?"★":"☆"}</button>
-    <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
+
+    <button class="fav">
+      ${v.fav ? "★" : "☆"}
+    </button>
+
+    <img
+      src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg"
+    >
 
     <div class="progress-wrap">
-      <div class="progress-bar" style="width:${watchProgress[v.id]||0}%"></div>
+      <div
+        class="progress-bar"
+        style="
+          width:${watchProgress[v.id] || 0}%
+        "
+      ></div>
     </div>
 
     <p>${v.title}</p>
+
   `;
 
   card.onclick=()=>openVideo(v.id);
 
-  card.querySelector(".delete").onclick=(e)=>{
+  /* DELETE */
+
+  card.querySelector(".delete")
+  .onclick=(e)=>{
+
     e.stopPropagation();
+
     removeVideo(i);
+
   };
 
-  card.querySelector(".fav").onclick=(e)=>{
+  /* FAVORITE */
+
+  card.querySelector(".fav")
+  .onclick=(e)=>{
+
     e.stopPropagation();
+
     toggleFav(i);
+
   };
 
   return card;
+
 }
 
 /* RENDER */
+
 function render(list=videos){
+
   allRow.innerHTML="";
   favRow.innerHTML="";
   continueRow.innerHTML="";
 
   list.forEach((v,i)=>{
-    allRow.appendChild(createCard(v,i));
 
-    if(v.fav) favRow.appendChild(createCard(v,i));
+    const card=
+    createCard(v,i);
 
-    if(lastWatched===v.id)
-      continueRow.appendChild(createCard(v,i));
+    allRow.appendChild(card);
+
+    if(v.fav){
+
+      favRow.appendChild(
+        createCard(v,i)
+      );
+
+    }
+
+    if(lastWatched===v.id){
+
+      continueRow.appendChild(
+        createCard(v,i)
+      );
+
+    }
+
   });
+
 }
+
+/* SHORTCUT */
+
+document.addEventListener("keydown",(e)=>{
+
+  if(e.key==="/"){
+
+    e.preventDefault();
+
+    searchInput.focus();
+
+  }
+
+});
 
 render();
 
