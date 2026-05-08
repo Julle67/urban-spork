@@ -284,19 +284,7 @@ body{
   border-radius:16px;
 }
 
-/* FULLSCREEN BUTTON */
-.fs-btn{
-  position:absolute;
-  bottom:20px;
-  right:20px;
-  z-index:9999;
-  padding:10px 14px;
-  border:none;
-  border-radius:10px;
-  background:#e50914;
-  color:white;
-  cursor:pointer;
-  font-weight:700;
+/
 }
 
 /* MOBILE */
@@ -410,12 +398,7 @@ body{
     allowfullscreen
   ></iframe>
 
-  <button
-    class="fs-btn"
-    onclick="toggleFullscreen(event)"
-  >
-    ⛶
-  </button>
+
 
 </div>
 
@@ -747,24 +730,8 @@ document.addEventListener("keydown",(e)=>{
 
 });
 
-/* FULLSCREEN */
-function toggleFullscreen(e){
 
-  if(e) e.stopPropagation();
 
-  const el = document.getElementById("player");
-
-  if(!document.fullscreenElement){
-
-    el.requestFullscreen();
-
-  }else{
-
-    document.exitFullscreen();
-
-  }
-
-}
 
 render();
 
