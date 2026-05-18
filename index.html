@@ -313,7 +313,25 @@ body{
   }
 
 }
+.about-btn{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#e50914;
+  color:white;
+  padding:12px 22px;
+  border-radius:999px;
+  text-decoration:none;
+  font-weight:700;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  transition:.2s;
+  z-index:1000;
+}
 
+.about-btn:hover{
+  transform:translateX(-50%) scale(1.05);
+}
 </style>
 </head>
 
@@ -397,7 +415,7 @@ body{
     allow="autoplay; fullscreen"
     allowfullscreen
   ></iframe>
-
+<a href="/about" class="about-btn">About us</a>
 
 
 </div>
@@ -739,4 +757,4 @@ render();
 
 </body>
 </html>
-```
+
