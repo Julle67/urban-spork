@@ -313,20 +313,20 @@ body{
   }
 
 }
-.about-btn{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#e50914;
+.about-link{
   color:white;
-  padding:12px 22px;
-  border-radius:999px;
   text-decoration:none;
-  font-weight:700;
-  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  font-weight:600;
+  margin-left:auto;
+  padding:8px 14px;
+  border-radius:999px;
+  background:#e50914;
   transition:.2s;
-  z-index:1000;
+}
+
+.about-link:hover{
+  transform:scale(1.05);
+}
 }
 
 .about-btn:hover{
@@ -349,10 +349,15 @@ body{
 <!-- NAV -->
 <div class="nav">
 
+<div class="nav">
+
   <div class="logo">
     <img src="icon-512.png">
     <span>Youtube Video Storage</span>
   </div>
+
+  <a href="/about" class="about-link">About us</a>
+
 
   <input
     class="search"
